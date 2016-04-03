@@ -19096,10 +19096,15 @@ var React = require("react");
 var Block = require("./Block.jsx");
 
 var Playground = React.createClass({displayName: "Playground",
-    leftKey: 37,
-    upKey: 38,
-    rightKey: 39,
-    downKey: 40,
+
+    keyArrowMap: {
+        37: "left",
+        38: "up",
+        39: "right",
+        40: "bottom"
+    },
+
+    numberMap: {},
 
     getDefaultProps: function() {
         return {
@@ -19130,8 +19135,16 @@ var Playground = React.createClass({displayName: "Playground",
 
 
         playData[0].number = 4;
-        playData[3].number = 3;
-        playData[5].number = 1;
+        playData[3].number = 2;
+        playData[7].number = 2;
+
+        this.numberMap = {
+            'left':     [0,                     colNumber,  rowNumber, 1,           colNumber],
+            'up':       [0,                     1,          colNumber, colNumber,   rowNumber],
+            'right':    [colNumber-1,           colNumber,  rowNumber, -1,          colNumber],
+            'bottom':   [colNumber*rowNumber-1, -1,         colNumber, -colNumber,  rowNumber]
+        };
+
 
         return {
             playData: playData
@@ -19143,30 +19156,92 @@ var Playground = React.createClass({displayName: "Playground",
     },
 
     _handleKeyDown: function(event) {
-        console.log(event);
+        var key = this.keyArrowMap[event.keyCode];
+        if(key) {
+            this._moveUp(key);
+        }
     },
 
-    _moveUp: function() {
+    _moveUp: function(key) {
 
         var rowNumber = this.props.table.row;
         var colNumber = this.props.table.col;
 
-        var startIndex = 0;
-        var changeIndex = 1;
-        var totalNumber = colNumber;
+        var paraArray = this.numberMap[key];
 
-        var currentChangeNumber = colNumber;
-        var currentTotalNumber = rowNumber;
+        var startIndex = paraArray[0];
+        var changeIndex = paraArray[1];
+        var totalNumber = paraArray[2];
+        var currentChangeNumber = paraArray[3];
+        var currentTotalNumber = paraArray[4];
 
         var startArray = [];
-        for(var index = startIndex; index < totalNumber; index += changeIndex) {
+        var startCount = 0;
+        for(var index = startIndex; startCount < totalNumber; index += changeIndex) {
             var thisArray = [];
-            for(var thisIndex = index; thisIndex < currentTotalNumber; thisIndex += currentChangeNumber) {
+            var thisCount = 0;
+            for(var thisIndex = index; thisCount < currentTotalNumber; thisIndex += currentChangeNumber) {
                 thisArray.push(thisIndex);
+                thisCount++;
             }
 
             startArray.push(thisArray);
+
+            startCount++;
         }
+
+        var oldData = this.state.playData;
+        var newData = oldData.slice();
+
+        var emptyIndex = [];
+
+        for(var sIndex = 0; sIndex < totalNumber; sIndex ++) {
+
+            var lastNumber = 0;
+            var newIndex = 0;
+
+            for(var tIndex = 0; tIndex < currentTotalNumber; tIndex ++) {
+                var rightIndex = startArray[sIndex][tIndex];
+
+                var thisData = oldData[rightIndex];
+                if (thisData.number) {
+                    if(lastNumber != thisData.number) {
+                        newData[startArray[sIndex][newIndex]].number = thisData.number;
+                        lastNumber = thisData.number;
+                        newIndex++;
+                    } else {
+                        newData[startArray[sIndex][newIndex - 1]].number = thisData.number * 2;
+                    }
+                }
+            }
+
+            for(var i = newIndex; i<currentTotalNumber; i++) {
+                newData[startArray[sIndex][i]].number = 0;
+                emptyIndex.push(startArray[sIndex][i]);
+            }
+        }
+
+        if(emptyIndex.length) {
+            newData[(Math.random() * emptyIndex.length) | 0].number = 2;
+        }
+
+        this.setState({
+            playData: newData
+        });
+    },
+
+    _logData: function(data) {
+        var numberData = data.map(function(item) {
+            return item.number;
+        });
+
+        var rowNumber = this.props.table.row;
+        var colNumber = this.props.table.col;
+
+        for(var i = 0; i<rowNumber * colNumber; i+= colNumber ) {
+            console.log(numberData.slice(i, i + colNumber));
+        }
+
     },
 
     _getBlocks: function () {
