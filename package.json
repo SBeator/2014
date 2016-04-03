@@ -1,0 +1,17 @@
+{
+  "name": "2014 test",
+  "version": "1.0.0",
+  "description": "A 2014 project with React.",
+  "scripts": {},
+  "devDependencies": {
+    "browserify": "^13.0.0",
+    "grunt": "^0.4.5",
+    "grunt-browserify": "^5.0.0",
+    "grunt-contrib-jshint-jsx": "^0.10.4",
+    "grunt-contrib-sass": "^1.0.0",
+    "grunt-contrib-watch": "^1.0.0",
+    "react": "^0.14.8",
+    "react-dom": "^0.14.8",
+    "reactify": "^1.1.1"
+  }
+}
