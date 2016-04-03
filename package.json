@@ -12,6 +12,7 @@
     "grunt-contrib-watch": "^1.0.0",
     "react": "^0.14.8",
     "react-dom": "^0.14.8",
+    "react-events": "^1.0.1",
     "reactify": "^1.1.1"
   }
 }

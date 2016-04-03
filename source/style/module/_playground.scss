@@ -1,0 +1,6 @@
+.playground {
+  position: relative;
+  margin: auto;
+  background-color: #40a070;
+  @include border-box-sizing();
+}
