@@ -19049,25 +19049,55 @@ var Block = React.createClass({displayName: "Block",
     },
 
     _showText: function() {
-        return !!this.props.number;
+        return !!this.props.data.number;
+    },
+
+    _needAnimation: function() {
+        return this.props.data.newPosition &&
+            !(this.props.data.newPosition.col == this.props.data.col &&
+            this.props.data.newPosition.row == this.props.data.row &&
+            this.props.data.newNumber == this.props.data.number);
+    },
+
+    _getClasses: function() {
+        return "block" + (this._needAnimation() ? " moving" : "");
     },
 
     _getStyle: function() {
         var width = this.props.size.width;
         var height = this.props.size.height;
 
-        return {
-            left: this.props.col * width,
-            top: this.props.row * height,
-            width: width,
-            height: height
-        };
+        var style;
+
+        if(this._needAnimation()) {
+            style = {
+                transition: "all " + this.props.animationTime + "s",
+                left: this.props.data.newPosition.col * width,
+                top: this.props.data.newPosition.row * height,
+                width: width,
+                height: height
+            };
+        } else {
+            style = {
+                left: this.props.data.col * width,
+                top: this.props.data.row * height,
+                width: width,
+                height: height
+            };
+        }
+
+        return style;
+
+    },
+
+    _getDisplayStyle: function() {
+        return this._needAnimation() ? { transition: "all " + this.props.animationTime + "s"} : {};
     },
 
     render: function() {
         return (
-            React.createElement("div", {className: "block", style: this._getStyle()}, 
-                React.createElement("div", {className: "block-display"}, this.props.number)
+            React.createElement("div", {className: this._getClasses(), style: this._getStyle()}, 
+                React.createElement("div", {className: "block-display", style: this._getDisplayStyle()}, this.props.data.number)
             ));
     }
 });
@@ -19096,6 +19126,7 @@ var React = require("react");
 var Block = require("./Block.jsx");
 
 var Playground = React.createClass({displayName: "Playground",
+    animationTime: 0.2,
 
     keyArrowMap: {
         37: "left",
@@ -19132,8 +19163,6 @@ var Playground = React.createClass({displayName: "Playground",
             }
         }
 
-
-
         playData[0].number = 4;
         playData[3].number = 2;
         playData[7].number = 2;
@@ -19145,9 +19174,9 @@ var Playground = React.createClass({displayName: "Playground",
             'bottom':   [colNumber*rowNumber-1, -1,         colNumber, -colNumber,  rowNumber]
         };
 
-
         return {
-            playData: playData
+            playData: playData,
+            animation: false
         };
     },
 
@@ -19205,28 +19234,55 @@ var Playground = React.createClass({displayName: "Playground",
 
                 var thisData = oldData[rightIndex];
                 if (thisData.number) {
+                    var newDataobj;
                     if(lastNumber != thisData.number) {
-                        newData[startArray[sIndex][newIndex]].number = thisData.number;
+                        newDataobj = newData[startArray[sIndex][newIndex]];
+                        newDataobj.newNumber = thisData.number;
+                        oldData[rightIndex].newPosition = {
+                            col: newDataobj.col,
+                            row: newDataobj.row
+                        };
                         lastNumber = thisData.number;
                         newIndex++;
                     } else {
-                        newData[startArray[sIndex][newIndex - 1]].number = thisData.number * 2;
+                        newDataobj = newData[startArray[sIndex][newIndex - 1]];
+                        newDataobj.newNumber = thisData.number * 2;
+                        oldData[rightIndex].newPosition = {
+                            col: newDataobj.col,
+                            row: newDataobj.row
+                        };
                     }
                 }
             }
 
+            if(newIndex != currentTotalNumber - 1) {
+                emptyIndex.push(startArray[sIndex][currentTotalNumber - 1]);
+            }
+
             for(var i = newIndex; i<currentTotalNumber; i++) {
-                newData[startArray[sIndex][i]].number = 0;
-                emptyIndex.push(startArray[sIndex][i]);
+                newData[startArray[sIndex][i]].newNumber = 0;
             }
         }
 
         if(emptyIndex.length) {
-            newData[(Math.random() * emptyIndex.length) | 0].number = 2;
+            oldData[emptyIndex[(Math.random() * emptyIndex.length) | 0]].newNumber = 2;
         }
 
+        var _this = this;
+        setTimeout(function() {
+            oldData.forEach(function(data) {
+                data.number = data.newNumber;
+                data.newPosition = null;
+            });
+
+            _this.setState({
+                playData: oldData,
+            });
+        }, this.animationTime * 1000);
+
         this.setState({
-            playData: newData
+            playData: oldData,
+            animation: true
         });
     },
 
@@ -19247,14 +19303,14 @@ var Playground = React.createClass({displayName: "Playground",
     _getBlocks: function () {
         var blockSize = this.props.block.size;
         var rowNumber = this.props.table.row;
+        var animationTime = this.animationTime;
 
         return this.state.playData.map(function(data) {
             return (
                  !!data.number ?
-                    (React.createElement(Block, {row: data.row, 
-                       col: data.col, 
-                       number: data.number, 
+                    (React.createElement(Block, {data: data, 
                        size: blockSize, 
+                       animationTime: animationTime, 
                        key: data.row * rowNumber + data.col})) :
                     "");
         });

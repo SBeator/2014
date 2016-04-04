@@ -12,25 +12,55 @@ var Block = React.createClass({
     },
 
     _showText: function() {
-        return !!this.props.number;
+        return !!this.props.data.number;
+    },
+
+    _needAnimation: function() {
+        return this.props.data.newPosition &&
+            !(this.props.data.newPosition.col == this.props.data.col &&
+            this.props.data.newPosition.row == this.props.data.row &&
+            this.props.data.newNumber == this.props.data.number);
+    },
+
+    _getClasses: function() {
+        return "block" + (this._needAnimation() ? " moving" : "");
     },
 
     _getStyle: function() {
         var width = this.props.size.width;
         var height = this.props.size.height;
 
-        return {
-            left: this.props.col * width,
-            top: this.props.row * height,
-            width: width,
-            height: height
-        };
+        var style;
+
+        if(this._needAnimation()) {
+            style = {
+                transition: "all " + this.props.animationTime + "s",
+                left: this.props.data.newPosition.col * width,
+                top: this.props.data.newPosition.row * height,
+                width: width,
+                height: height
+            };
+        } else {
+            style = {
+                left: this.props.data.col * width,
+                top: this.props.data.row * height,
+                width: width,
+                height: height
+            };
+        }
+
+        return style;
+
+    },
+
+    _getDisplayStyle: function() {
+        return this._needAnimation() ? { transition: "all " + this.props.animationTime + "s"} : {};
     },
 
     render: function() {
         return (
-            <div className="block" style={this._getStyle()}>
-                <div className="block-display">{this.props.number}</div>
+            <div className={this._getClasses()} style={this._getStyle()}>
+                <div className="block-display" style={this._getDisplayStyle()}>{this.props.data.number}</div>
             </div>);
     }
 });

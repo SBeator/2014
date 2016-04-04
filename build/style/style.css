@@ -26,3 +26,6 @@ html, body {
   text-align: center;
   vertical-align: middle;
 }
+.block.moving .block-display {
+  color: red;
+}
