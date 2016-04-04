@@ -11,7 +11,7 @@ var Playground = React.createClass({
         39: "right",
         40: "bottom"
     },
-
+ 
     numberMap: {},
 
     getDefaultProps: function() {
