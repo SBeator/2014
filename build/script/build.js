@@ -19072,6 +19072,7 @@ var Block = React.createClass({displayName: "Block",
         if(this._needAnimation()) {
             style = {
                 transition: "all " + this.props.animationTime + "s",
+                zIndex: this.props.data.newPosition.zIndex,
                 left: this.props.data.newPosition.col * width,
                 top: this.props.data.newPosition.row * height,
                 width: width,
@@ -19105,27 +19106,111 @@ var Block = React.createClass({displayName: "Block",
 module.exports = Block;
 
 },{"react":158}],160:[function(require,module,exports){
+var eventHandlerMap = {};
+
+var Event = {
+    thisEventHandlerMap: {},
+
+    triggerEvent: function(name) {
+        var otherArguments = Array.prototype.slice.call(arguments, 1);
+        var _this = this;
+
+        if(eventHandlerMap[name]) {
+            var handlers = eventHandlerMap[name];
+            handlers.forEach(function(handler) {
+                setTimeout(function() {
+                    handler.apply(_this, otherArguments);
+                }, 0);
+            });
+        }
+    },
+
+    bindEvent: function(name, callback) {
+        var handlers = eventHandlerMap[name] || [];
+        if(handlers.indexOf(callback) < 0) {
+            handlers.push(callback);
+        }
+
+        eventHandlerMap[name] = handlers;
+    },
+
+    unbindEvent: function(name, callback) {
+        var handlers = eventHandlerMap[name];
+        if(handlers) {
+            eventHandlerMap[name] = handlers.filter(function(handler) {
+                return handler != callback;
+            });
+        }
+
+        var thisHandlers = this.thisEventHandlerMap[name];
+        if(thisHandlers) {
+            this.thisEventHandlerMap[name] = thisHandlers.filter(function(handler) {
+                return handler != callback;
+            });
+        }
+    },
+
+    componentDidMount: function() {
+        if(this.events) {
+            for(var name in this.events) {
+                var callback = this.events[name];
+                if(callback) {
+                    if(typeof callback == "string" && this[callback]) {
+                        this.bindEvent(name, this[callback]);
+                    } else if(typeof callback == "function") {
+                        this.bindEvent(name, callback);
+                    }
+                } else {
+                    warning(true, "Bind event " + name + " fail, the callback is empty or undefined");
+                }
+            }
+        }
+    },
+
+    componentWillUnmount: function() {
+        for(var name in this.thisEventHandlerMap) {
+            var thisHandlers = this.thisEventHandlerMap[name];
+            var handlers = eventHandlerMap[name];
+            if(handlers) {
+                eventHandlerMap[name] = handlers.filter(this._checkIfHandlerInThisHandlers.bind(this, thisHandlers));
+            }
+        }
+    },
+
+    _checkIfHandlerInThisHandlers: function(thisHandlers, handler) {
+        return thisHandlers.indexOf(handler) < 0;
+    }
+};
+
+module.exports = Event;
+
+},{}],161:[function(require,module,exports){
 var React = require("react");
 
 var Playground = require("./Playground.jsx");
+var Score = require("./Score.jsx");
 
 var Main = React.createClass({displayName: "Main",
     render: function() {
         return (
             React.createElement("div", {className: "main"}, 
-                React.createElement(Playground, {table: this.props.data.table, block: this.props.data.block})
+                React.createElement(Playground, {table: this.props.data.table, block: this.props.data.block}), 
+                React.createElement(Score, null)
             ));
     }
 });
 
 module.exports = Main;
 
-},{"./Playground.jsx":161,"react":158}],161:[function(require,module,exports){
+},{"./Playground.jsx":162,"./Score.jsx":163,"react":158}],162:[function(require,module,exports){
 var React = require("react");
 
 var Block = require("./Block.jsx");
+var Event = require("./Event.jsx");
 
 var Playground = React.createClass({displayName: "Playground",
+    mixins: [Event],
+
     animationTime: 0.2,
 
     keyArrowMap: {
@@ -19134,7 +19219,7 @@ var Playground = React.createClass({displayName: "Playground",
         39: "right",
         40: "bottom"
     },
- 
+
     numberMap: {},
 
     getDefaultProps: function() {
@@ -19158,7 +19243,7 @@ var Playground = React.createClass({displayName: "Playground",
                 playData.push({
                     row: row,
                     col: col,
-                    number: emptyNumber
+                    number: 2
                 });
             }
         }
@@ -19224,6 +19309,8 @@ var Playground = React.createClass({displayName: "Playground",
 
         var emptyIndex = [];
 
+        var score = 0;
+
         for(var sIndex = 0; sIndex < totalNumber; sIndex ++) {
 
             var lastNumber = 0;
@@ -19240,7 +19327,8 @@ var Playground = React.createClass({displayName: "Playground",
                         newDataobj.newNumber = thisData.number;
                         oldData[rightIndex].newPosition = {
                             col: newDataobj.col,
-                            row: newDataobj.row
+                            row: newDataobj.row,
+                            zIndex: 1,
                         };
                         lastNumber = thisData.number;
                         newIndex++;
@@ -19249,19 +19337,26 @@ var Playground = React.createClass({displayName: "Playground",
                         newDataobj.newNumber = thisData.number * 2;
                         oldData[rightIndex].newPosition = {
                             col: newDataobj.col,
-                            row: newDataobj.row
+                            row: newDataobj.row,
+                            zIndex: 0
                         };
+                        lastNumber = 0;
+                        score += thisData.number;
                     }
                 }
             }
 
-            if(newIndex != currentTotalNumber - 1) {
+            if(newIndex != currentTotalNumber) {
                 emptyIndex.push(startArray[sIndex][currentTotalNumber - 1]);
             }
 
             for(var i = newIndex; i<currentTotalNumber; i++) {
                 newData[startArray[sIndex][i]].newNumber = 0;
             }
+        }
+
+        if(score) {
+            this.triggerEvent("score", score);
         }
 
         if(emptyIndex.length) {
@@ -19333,7 +19428,51 @@ var Playground = React.createClass({displayName: "Playground",
 
 module.exports = Playground;
 
-},{"./Block.jsx":159,"react":158}],162:[function(require,module,exports){
+},{"./Block.jsx":159,"./Event.jsx":160,"react":158}],163:[function(require,module,exports){
+var React = require("react");
+
+var Event = require("./Event.jsx");
+
+var Score = React.createClass({displayName: "Score",
+    mixins: [Event],
+
+    events: {
+        "score": "_handleScoreChange"
+    },
+
+    getDefaultProps: function() {
+        return {
+            score: 0
+        };
+    },
+
+    getInitialState: function () {
+        return {
+            score: this.props.score
+        };
+    },
+
+    //componentDidMount: function() {
+    //    this.bindEvent("score", this._handleScoreChange);
+    //},
+
+    _handleScoreChange: function(changeScore) {
+        this.setState({
+           score: this.state.score + changeScore
+        });
+    },
+
+    render: function() {
+        return (
+            React.createElement("div", {className: "score"}, 
+                this.state.score
+            ));
+    }
+});
+
+module.exports = Score;
+
+},{"./Event.jsx":160,"react":158}],164:[function(require,module,exports){
 var React = require('react');
 var ReactDOM = require('react-dom');
 
@@ -19357,4 +19496,4 @@ ReactDOM.render(
     (React.createElement(Main, {data: data})),
     document.getElementById('content'));
 
-},{"./React/Main.jsx":160,"react":158,"react-dom":29}]},{},[159,160,161,162]);
+},{"./React/Main.jsx":161,"react":158,"react-dom":29}]},{},[159,160,161,162,163,164]);

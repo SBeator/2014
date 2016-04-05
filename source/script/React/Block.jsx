@@ -35,6 +35,7 @@ var Block = React.createClass({
         if(this._needAnimation()) {
             style = {
                 transition: "all " + this.props.animationTime + "s",
+                zIndex: this.props.data.newPosition.zIndex,
                 left: this.props.data.newPosition.col * width,
                 top: this.props.data.newPosition.row * height,
                 width: width,

@@ -1,8 +1,11 @@
 var React = require("react");
 
 var Block = require("./Block.jsx");
+var Event = require("./Event.jsx");
 
 var Playground = React.createClass({
+    mixins: [Event],
+
     animationTime: 0.2,
 
     keyArrowMap: {
@@ -11,7 +14,7 @@ var Playground = React.createClass({
         39: "right",
         40: "bottom"
     },
- 
+
     numberMap: {},
 
     getDefaultProps: function() {
@@ -35,7 +38,7 @@ var Playground = React.createClass({
                 playData.push({
                     row: row,
                     col: col,
-                    number: emptyNumber
+                    number: 2
                 });
             }
         }
@@ -101,6 +104,8 @@ var Playground = React.createClass({
 
         var emptyIndex = [];
 
+        var score = 0;
+
         for(var sIndex = 0; sIndex < totalNumber; sIndex ++) {
 
             var lastNumber = 0;
@@ -117,7 +122,8 @@ var Playground = React.createClass({
                         newDataobj.newNumber = thisData.number;
                         oldData[rightIndex].newPosition = {
                             col: newDataobj.col,
-                            row: newDataobj.row
+                            row: newDataobj.row,
+                            zIndex: 1,
                         };
                         lastNumber = thisData.number;
                         newIndex++;
@@ -126,19 +132,26 @@ var Playground = React.createClass({
                         newDataobj.newNumber = thisData.number * 2;
                         oldData[rightIndex].newPosition = {
                             col: newDataobj.col,
-                            row: newDataobj.row
+                            row: newDataobj.row,
+                            zIndex: 0
                         };
+                        lastNumber = 0;
+                        score += thisData.number;
                     }
                 }
             }
 
-            if(newIndex != currentTotalNumber - 1) {
+            if(newIndex != currentTotalNumber) {
                 emptyIndex.push(startArray[sIndex][currentTotalNumber - 1]);
             }
 
             for(var i = newIndex; i<currentTotalNumber; i++) {
                 newData[startArray[sIndex][i]].newNumber = 0;
             }
+        }
+
+        if(score) {
+            this.triggerEvent("score", score);
         }
 
         if(emptyIndex.length) {
