@@ -215,7 +215,7 @@ var Game1024 = React.createClass({
 
     render: function () {
         return (
-            <div className="playground" style={this._getStyle()} onKeyPress={this._handleKeyDown}>
+            <div className="game_1024" style={this._getStyle()} onKeyPress={this._handleKeyDown}>
                 {this._getBlocks()}
             </div>);
     }

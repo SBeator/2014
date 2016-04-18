@@ -19402,7 +19402,7 @@ var Game1024 = React.createClass({displayName: "Game1024",
 
     render: function () {
         return (
-            React.createElement("div", {className: "playground", style: this._getStyle(), onKeyPress: this._handleKeyDown}, 
+            React.createElement("div", {className: "game_1024", style: this._getStyle(), onKeyPress: this._handleKeyDown}, 
                 this._getBlocks()
             ));
     }
@@ -19413,6 +19413,188 @@ module.exports = Game1024;
 },{"./../../Event.jsx":159,"./Block.jsx":160,"react":158}],162:[function(require,module,exports){
 var React = require("react");
 
+var Balloon = React.createClass({displayName: "Balloon",
+
+    sidePadding: 20,
+
+    size: {},
+
+    getDefaultProps: function() {
+        return {
+            playgroundSize: {
+                width: 200,
+                height: 200
+            },
+
+            maxScore: 10,
+
+            maxSize: 50,
+            minSize: 20
+        };
+    },
+
+    getInitialState: function() {
+
+        this.size = this._getSize();
+
+        var playgroundSize = this.props.playgroundSize;
+
+        return {
+            top: playgroundSize + this.sidePadding,
+            left: Math.random() * (playgroundSize.width - this.size.width - this.sidePadding * 2) + this.sidePadding
+        };
+    },
+
+    _getSize: function() {
+        var maxScore = this.props.maxScore;
+        var score = this.props.hitScore;
+
+        warning(isNaN(parseInt(score)), "score is not a number");
+
+        if (score < 0) {
+            score = 0;
+        } else if (score > this.props.maxScore) {
+            score = this.props.maxScore;
+        }
+
+        var size = this.props.minSize + (maxScore - score) * (this.props.maxSize - this.props.minSize);
+
+        return {
+            width: size,
+            height: size
+        };
+    },
+
+
+    _getClasses: function() {
+        return "balloon";
+    },
+
+    _getStyle: function() {
+        var style = {
+            top: this.state.top,
+            left: this.state.left
+        };
+
+        return style;
+    },
+
+    _getDisplayStyle: function() {
+        return this._needAnimation() ? { transition: "all " + this.props.animationTime + "s"} : {};
+    },
+
+    render: function() {
+        return (
+            React.createElement("div", {className: this._getClasses(), style: this._getStyle()}, 
+                React.createElement("div", {className: "balloon-display"}, this.props.hitScore)
+            ));
+    }
+});
+
+module.exports = Balloon;
+
+},{"react":158}],163:[function(require,module,exports){
+var React = require("react");
+
+var Event = require("./../../Event.jsx");
+
+var ShootBalloon = React.createClass({displayName: "ShootBalloon",
+    mixins: [Event],
+
+    animationTime: 0.2,
+
+    keyArrowMap: {
+        37: "left",
+        38: "up",
+        39: "right",
+        40: "bottom"
+    },
+
+    numberMap: {},
+
+    getDefaultProps: function() {
+        return {
+            table: {
+                col: 4,
+                row: 4
+            }
+        };
+    },
+
+    getInitialState: function () {
+        var playData = [];
+        var emptyNumber = 0;
+
+        var rowNumber = this.props.table.row;
+        var colNumber = this.props.table.col;
+
+        for (var row = 0; row < rowNumber; row++) {
+            for (var col = 0; col < colNumber; col++) {
+                playData.push({
+                    row: row,
+                    col: col,
+                    number: 2
+                });
+            }
+        }
+
+        playData[0].number = 4;
+        playData[3].number = 2;
+        playData[7].number = 2;
+
+        this.numberMap = {
+            'left':     [0,                     colNumber,  rowNumber, 1,           colNumber],
+            'up':       [0,                     1,          colNumber, colNumber,   rowNumber],
+            'right':    [colNumber-1,           colNumber,  rowNumber, -1,          colNumber],
+            'bottom':   [colNumber*rowNumber-1, -1,         colNumber, -colNumber,  rowNumber]
+        };
+
+        return {
+            playData: playData,
+            animation: false
+        };
+    },
+
+    componentDidMount: function() {
+        window.addEventListener("keydown", this._handleKeyDown);
+    },
+
+    _getBalloons: function () {
+        var blockSize = this.props.block.size;
+        var rowNumber = this.props.table.row;
+        var animationTime = this.animationTime;
+
+        return this.state.playData.map(function(data) {
+            return (
+                !!data.number ?
+                    (React.createElement(Block, {data: data, 
+                            size: blockSize, 
+                            animationTime: animationTime, 
+                            key: data.row * rowNumber + data.col})) :
+                    "");
+        });
+    },
+
+    _getStyle: function() {
+        return {
+            width: this.props.block.size.width * this.props.table.col,
+            height: this.props.block.size.height * this.props.table.row
+        };
+    },
+
+    render: function () {
+        return (
+            React.createElement("div", {className: "shoot_balloon", style: this._getStyle(), onKeyPress: this._handleKeyDown}, 
+                this._getBalloons()
+            ));
+    }
+});
+
+module.exports = ShootBalloon;
+
+},{"./../../Event.jsx":159,"react":158}],164:[function(require,module,exports){
+var React = require("react");
+
 var Game1024 = require("./Games/1024/Game1024.jsx");
 var Score = require("./Score.jsx");
 
@@ -19421,6 +19603,7 @@ var Main = React.createClass({displayName: "Main",
         return (
             React.createElement("div", {className: "main"}, 
                 React.createElement(Game1024, {table: this.props.data.table, block: this.props.data.block}), 
+                React.createElement(Game1024, {table: this.props.data.table, block: this.props.data.block}), 
                 React.createElement(Score, null)
             ));
     }
@@ -19428,7 +19611,7 @@ var Main = React.createClass({displayName: "Main",
 
 module.exports = Main;
 
-},{"./Games/1024/Game1024.jsx":161,"./Score.jsx":163,"react":158}],163:[function(require,module,exports){
+},{"./Games/1024/Game1024.jsx":161,"./Score.jsx":165,"react":158}],165:[function(require,module,exports){
 var React = require("react");
 
 var Event = require("./Event.jsx");
@@ -19472,7 +19655,7 @@ var Score = React.createClass({displayName: "Score",
 
 module.exports = Score;
 
-},{"./Event.jsx":159,"react":158}],164:[function(require,module,exports){
+},{"./Event.jsx":159,"react":158}],166:[function(require,module,exports){
 var React = require('react');
 var ReactDOM = require('react-dom');
 
@@ -19496,4 +19679,4 @@ ReactDOM.render(
     (React.createElement(Main, {data: data})),
     document.getElementById('content'));
 
-},{"./React/Main.jsx":162,"react":158,"react-dom":29}]},{},[159,160,161,162,163,164]);
+},{"./React/Main.jsx":164,"react":158,"react-dom":29}]},{},[159,160,161,162,163,164,165,166]);

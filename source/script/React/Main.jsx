@@ -8,6 +8,7 @@ var Main = React.createClass({
         return (
             <div className="main">
                 <Game1024 table={this.props.data.table} block={this.props.data.block} />
+                <Game1024 table={this.props.data.table} block={this.props.data.block} />
                 <Score />
             </div>);
     }

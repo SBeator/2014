@@ -9,7 +9,13 @@ html, body {
   box-sizing: border-box;
 }
 
-.block {
+.game_1024 {
+  position: relative;
+  margin: auto;
+  background-color: #40a070;
+  box-sizing: border-box;
+}
+.game_1024 .block {
   position: absolute;
   display: table;
   box-sizing: border-box;
@@ -17,7 +23,7 @@ html, body {
   margin: 0;
   background-color: green;
 }
-.block .block-display {
+.game_1024 .block .block-display {
   display: table-cell;
   background-color: red;
   width: 100%;
@@ -26,6 +32,6 @@ html, body {
   text-align: center;
   vertical-align: middle;
 }
-.block.moving .block-display {
+.game_1024 .block.moving .block-display {
   color: red;
 }
