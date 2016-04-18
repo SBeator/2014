@@ -19339,6 +19339,7 @@ var Game1024 = React.createClass({displayName: "Game1024",
 
         if(score) {
             this.triggerEvent("score", score);
+            this.triggerEvent("score_1024", score);
         }
 
         if(emptyIndex.length) {
@@ -19417,7 +19418,11 @@ var Balloon = React.createClass({displayName: "Balloon",
 
     sidePadding: 20,
 
-    size: {},
+    animationTime: 1,
+    size: {
+        width: 20,
+        height: 20
+    },
 
     getDefaultProps: function() {
         return {
@@ -19429,27 +19434,55 @@ var Balloon = React.createClass({displayName: "Balloon",
             maxScore: 10,
 
             maxSize: 50,
-            minSize: 20
+            minSize: 20,
+
+            maxAnimationTime: 5,
+            minAnimationTime: 0.5
         };
     },
 
     getInitialState: function() {
 
         this.size = this._getSize();
+        this.animationTime = this._getAnimationTime();
 
         var playgroundSize = this.props.playgroundSize;
 
         return {
-            top: playgroundSize + this.sidePadding,
+            top: playgroundSize.height + this.sidePadding,
             left: Math.random() * (playgroundSize.width - this.size.width - this.sidePadding * 2) + this.sidePadding
         };
     },
 
+    componentDidMount: function() {
+        var _this = this;
+        setTimeout(function() {
+            _this.setState({
+               top: -_this.size.height
+            });
+        }, 10);
+    },
+
+    _getAnimationTime: function() {
+        var animationTime = this.props.minAnimationTime + ( 1 - this._getScorePercent()) * (this.props.maxAnimationTime - this.props.minAnimationTime);
+
+        return animationTime;
+    },
+
     _getSize: function() {
+        var size = this.props.minSize + this._getScorePercent() * (this.props.maxSize - this.props.minSize);
+
+        return {
+            width: size,
+            height: size
+        };
+    },
+
+    _getScorePercent: function() {
         var maxScore = this.props.maxScore;
         var score = this.props.hitScore;
 
-        warning(isNaN(parseInt(score)), "score is not a number");
+        // warning(typeof(score) != "number", "score is not a number");
 
         if (score < 0) {
             score = 0;
@@ -19457,12 +19490,7 @@ var Balloon = React.createClass({displayName: "Balloon",
             score = this.props.maxScore;
         }
 
-        var size = this.props.minSize + (maxScore - score) * (this.props.maxSize - this.props.minSize);
-
-        return {
-            width: size,
-            height: size
-        };
+        return score / maxScore;
     },
 
 
@@ -19473,14 +19501,14 @@ var Balloon = React.createClass({displayName: "Balloon",
     _getStyle: function() {
         var style = {
             top: this.state.top,
-            left: this.state.left
+            left: this.state.left,
+            width: this.size.width,
+            height: this.size.height,
+            lineHeight: this.size.height + "px",
+            transition: "all " + this.animationTime + "s"
         };
 
         return style;
-    },
-
-    _getDisplayStyle: function() {
-        return this._needAnimation() ? { transition: "all " + this.props.animationTime + "s"} : {};
     },
 
     render: function() {
@@ -19496,95 +19524,46 @@ module.exports = Balloon;
 },{"react":158}],163:[function(require,module,exports){
 var React = require("react");
 
+var Balloon = require("./Balloon.jsx");
+
 var Event = require("./../../Event.jsx");
 
 var ShootBalloon = React.createClass({displayName: "ShootBalloon",
     mixins: [Event],
 
-    animationTime: 0.2,
-
-    keyArrowMap: {
-        37: "left",
-        38: "up",
-        39: "right",
-        40: "bottom"
-    },
-
-    numberMap: {},
-
-    getDefaultProps: function() {
-        return {
-            table: {
-                col: 4,
-                row: 4
-            }
-        };
-    },
-
     getInitialState: function () {
-        var playData = [];
-        var emptyNumber = 0;
-
-        var rowNumber = this.props.table.row;
-        var colNumber = this.props.table.col;
-
-        for (var row = 0; row < rowNumber; row++) {
-            for (var col = 0; col < colNumber; col++) {
-                playData.push({
-                    row: row,
-                    col: col,
-                    number: 2
-                });
-            }
-        }
-
-        playData[0].number = 4;
-        playData[3].number = 2;
-        playData[7].number = 2;
-
-        this.numberMap = {
-            'left':     [0,                     colNumber,  rowNumber, 1,           colNumber],
-            'up':       [0,                     1,          colNumber, colNumber,   rowNumber],
-            'right':    [colNumber-1,           colNumber,  rowNumber, -1,          colNumber],
-            'bottom':   [colNumber*rowNumber-1, -1,         colNumber, -colNumber,  rowNumber]
-        };
-
         return {
-            playData: playData,
-            animation: false
+            balloons: []
         };
     },
 
     componentDidMount: function() {
-        window.addEventListener("keydown", this._handleKeyDown);
+        this.bindEvent("score_1024", this._addBalloon);
     },
 
-    _getBalloons: function () {
-        var blockSize = this.props.block.size;
-        var rowNumber = this.props.table.row;
-        var animationTime = this.animationTime;
+    _addBalloon: function(hitScore) {
+        var balloons = this.state.balloons;
 
-        return this.state.playData.map(function(data) {
-            return (
-                !!data.number ?
-                    (React.createElement(Block, {data: data, 
-                            size: blockSize, 
-                            animationTime: animationTime, 
-                            key: data.row * rowNumber + data.col})) :
-                    "");
+        balloons.push({
+            key: Date.now(),
+            hitScore: hitScore
+        });
+
+        this.setState({
+            balloons: balloons
         });
     },
 
-    _getStyle: function() {
-        return {
-            width: this.props.block.size.width * this.props.table.col,
-            height: this.props.block.size.height * this.props.table.row
-        };
+    _getBalloons: function () {
+
+        return this.state.balloons.map(function(balloon) {
+            return (React.createElement(Balloon, {hitScore: balloon.hitScore, key: balloon.key}));
+        });
     },
 
     render: function () {
         return (
-            React.createElement("div", {className: "shoot_balloon", style: this._getStyle(), onKeyPress: this._handleKeyDown}, 
+            React.createElement("div", {className: "shoot_balloon"}, 
                 this._getBalloons()
             ));
     }
@@ -19592,10 +19571,11 @@ var ShootBalloon = React.createClass({displayName: "ShootBalloon",
 
 module.exports = ShootBalloon;
 
-},{"./../../Event.jsx":159,"react":158}],164:[function(require,module,exports){
+},{"./../../Event.jsx":159,"./Balloon.jsx":162,"react":158}],164:[function(require,module,exports){
 var React = require("react");
 
 var Game1024 = require("./Games/1024/Game1024.jsx");
+var ShootBalloon = require("./Games/ShootBalloon/ShootBalloon.jsx");
 var Score = require("./Score.jsx");
 
 var Main = React.createClass({displayName: "Main",
@@ -19603,7 +19583,7 @@ var Main = React.createClass({displayName: "Main",
         return (
             React.createElement("div", {className: "main"}, 
                 React.createElement(Game1024, {table: this.props.data.table, block: this.props.data.block}), 
-                React.createElement(Game1024, {table: this.props.data.table, block: this.props.data.block}), 
+                React.createElement(ShootBalloon, null), 
                 React.createElement(Score, null)
             ));
     }
@@ -19611,7 +19591,7 @@ var Main = React.createClass({displayName: "Main",
 
 module.exports = Main;
 
-},{"./Games/1024/Game1024.jsx":161,"./Score.jsx":165,"react":158}],165:[function(require,module,exports){
+},{"./Games/1024/Game1024.jsx":161,"./Games/ShootBalloon/ShootBalloon.jsx":163,"./Score.jsx":165,"react":158}],165:[function(require,module,exports){
 var React = require("react");
 
 var Event = require("./Event.jsx");

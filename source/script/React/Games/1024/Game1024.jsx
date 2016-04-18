@@ -152,6 +152,7 @@ var Game1024 = React.createClass({
 
         if(score) {
             this.triggerEvent("score", score);
+            this.triggerEvent("score_1024", score);
         }
 
         if(emptyIndex.length) {

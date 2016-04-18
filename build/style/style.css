@@ -2,11 +2,18 @@ html, body {
   margin: 0;
 }
 
-.playground {
+.shoot_balloon {
+  width: 220px;
+  height: 220px;
   position: relative;
-  margin: auto;
-  background-color: #40a070;
+  overflow: hidden;
   box-sizing: border-box;
+}
+.shoot_balloon .balloon {
+  position: absolute;
+  text-align: center;
+  border-radius: 50%;
+  background-color: #2b81af;
 }
 
 .game_1024 {
