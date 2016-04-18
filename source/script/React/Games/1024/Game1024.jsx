@@ -1,9 +1,9 @@
 var React = require("react");
 
 var Block = require("./Block.jsx");
-var Event = require("./Event.jsx");
+var Event = require("./../../Event.jsx");
 
-var Playground = React.createClass({
+var Game1024 = React.createClass({
     mixins: [Event],
 
     animationTime: 0.2,
@@ -221,4 +221,4 @@ var Playground = React.createClass({
     }
 });
 
-module.exports = Playground;
+module.exports = Game1024;

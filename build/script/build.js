@@ -19035,77 +19035,6 @@ module.exports = validateDOMNesting;
 module.exports = require('./lib/React');
 
 },{"./lib/React":53}],159:[function(require,module,exports){
-var React = require("react");
-
-var Block = React.createClass({displayName: "Block",
-
-    getDefaultProps: function() {
-        return {
-            size: {
-                width: 50,
-                height: 50
-            }
-        };
-    },
-
-    _showText: function() {
-        return !!this.props.data.number;
-    },
-
-    _needAnimation: function() {
-        return this.props.data.newPosition &&
-            !(this.props.data.newPosition.col == this.props.data.col &&
-            this.props.data.newPosition.row == this.props.data.row &&
-            this.props.data.newNumber == this.props.data.number);
-    },
-
-    _getClasses: function() {
-        return "block" + (this._needAnimation() ? " moving" : "");
-    },
-
-    _getStyle: function() {
-        var width = this.props.size.width;
-        var height = this.props.size.height;
-
-        var style;
-
-        if(this._needAnimation()) {
-            style = {
-                transition: "all " + this.props.animationTime + "s",
-                zIndex: this.props.data.newPosition.zIndex,
-                left: this.props.data.newPosition.col * width,
-                top: this.props.data.newPosition.row * height,
-                width: width,
-                height: height
-            };
-        } else {
-            style = {
-                left: this.props.data.col * width,
-                top: this.props.data.row * height,
-                width: width,
-                height: height
-            };
-        }
-
-        return style;
-
-    },
-
-    _getDisplayStyle: function() {
-        return this._needAnimation() ? { transition: "all " + this.props.animationTime + "s"} : {};
-    },
-
-    render: function() {
-        return (
-            React.createElement("div", {className: this._getClasses(), style: this._getStyle()}, 
-                React.createElement("div", {className: "block-display", style: this._getDisplayStyle()}, this.props.data.number)
-            ));
-    }
-});
-
-module.exports = Block;
-
-},{"react":158}],160:[function(require,module,exports){
 var eventHandlerMap = {};
 
 var Event = {
@@ -19184,31 +19113,84 @@ var Event = {
 
 module.exports = Event;
 
-},{}],161:[function(require,module,exports){
+},{}],160:[function(require,module,exports){
 var React = require("react");
 
-var Playground = require("./Playground.jsx");
-var Score = require("./Score.jsx");
+var Block = React.createClass({displayName: "Block",
 
-var Main = React.createClass({displayName: "Main",
+    getDefaultProps: function() {
+        return {
+            size: {
+                width: 50,
+                height: 50
+            }
+        };
+    },
+
+    _showText: function() {
+        return !!this.props.data.number;
+    },
+
+    _needAnimation: function() {
+        return this.props.data.newPosition &&
+            !(this.props.data.newPosition.col == this.props.data.col &&
+            this.props.data.newPosition.row == this.props.data.row &&
+            this.props.data.newNumber == this.props.data.number);
+    },
+
+    _getClasses: function() {
+        return "block" + (this._needAnimation() ? " moving" : "");
+    },
+
+    _getStyle: function() {
+        var width = this.props.size.width;
+        var height = this.props.size.height;
+
+        var style;
+
+        if(this._needAnimation()) {
+            style = {
+                transition: "all " + this.props.animationTime + "s",
+                zIndex: this.props.data.newPosition.zIndex,
+                left: this.props.data.newPosition.col * width,
+                top: this.props.data.newPosition.row * height,
+                width: width,
+                height: height
+            };
+        } else {
+            style = {
+                left: this.props.data.col * width,
+                top: this.props.data.row * height,
+                width: width,
+                height: height
+            };
+        }
+
+        return style;
+
+    },
+
+    _getDisplayStyle: function() {
+        return this._needAnimation() ? { transition: "all " + this.props.animationTime + "s"} : {};
+    },
+
     render: function() {
         return (
-            React.createElement("div", {className: "main"}, 
-                React.createElement(Playground, {table: this.props.data.table, block: this.props.data.block}), 
-                React.createElement(Score, null)
+            React.createElement("div", {className: this._getClasses(), style: this._getStyle()}, 
+                React.createElement("div", {className: "block-display", style: this._getDisplayStyle()}, this.props.data.number)
             ));
     }
 });
 
-module.exports = Main;
+module.exports = Block;
 
-},{"./Playground.jsx":162,"./Score.jsx":163,"react":158}],162:[function(require,module,exports){
+},{"react":158}],161:[function(require,module,exports){
 var React = require("react");
 
 var Block = require("./Block.jsx");
-var Event = require("./Event.jsx");
+var Event = require("./../../Event.jsx");
 
-var Playground = React.createClass({displayName: "Playground",
+var Game1024 = React.createClass({displayName: "Game1024",
     mixins: [Event],
 
     animationTime: 0.2,
@@ -19426,9 +19408,27 @@ var Playground = React.createClass({displayName: "Playground",
     }
 });
 
-module.exports = Playground;
+module.exports = Game1024;
 
-},{"./Block.jsx":159,"./Event.jsx":160,"react":158}],163:[function(require,module,exports){
+},{"./../../Event.jsx":159,"./Block.jsx":160,"react":158}],162:[function(require,module,exports){
+var React = require("react");
+
+var Game1024 = require("./Games/1024/Game1024.jsx");
+var Score = require("./Score.jsx");
+
+var Main = React.createClass({displayName: "Main",
+    render: function() {
+        return (
+            React.createElement("div", {className: "main"}, 
+                React.createElement(Game1024, {table: this.props.data.table, block: this.props.data.block}), 
+                React.createElement(Score, null)
+            ));
+    }
+});
+
+module.exports = Main;
+
+},{"./Games/1024/Game1024.jsx":161,"./Score.jsx":163,"react":158}],163:[function(require,module,exports){
 var React = require("react");
 
 var Event = require("./Event.jsx");
@@ -19472,7 +19472,7 @@ var Score = React.createClass({displayName: "Score",
 
 module.exports = Score;
 
-},{"./Event.jsx":160,"react":158}],164:[function(require,module,exports){
+},{"./Event.jsx":159,"react":158}],164:[function(require,module,exports){
 var React = require('react');
 var ReactDOM = require('react-dom');
 
@@ -19496,4 +19496,4 @@ ReactDOM.render(
     (React.createElement(Main, {data: data})),
     document.getElementById('content'));
 
-},{"./React/Main.jsx":161,"react":158,"react-dom":29}]},{},[159,160,161,162,163,164]);
+},{"./React/Main.jsx":162,"react":158,"react-dom":29}]},{},[159,160,161,162,163,164]);

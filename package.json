@@ -1,8 +1,10 @@
 {
-  "name": "2014 test",
+  "name": "2014_test",
   "version": "1.0.0",
   "description": "A 2014 project with React.",
-  "scripts": {},
+  "scripts": {
+    "start": "grunt"
+  },
   "devDependencies": {
     "browserify": "^13.0.0",
     "grunt": "^0.4.5",
