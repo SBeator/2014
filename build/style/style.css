@@ -7,6 +7,8 @@ html, body {
   height: 220px;
   position: relative;
   overflow: hidden;
+  margin: auto;
+  background-color: #40a070;
   box-sizing: border-box;
 }
 .shoot_balloon .balloon {
@@ -14,6 +16,13 @@ html, body {
   text-align: center;
   border-radius: 50%;
   background-color: #2b81af;
+}
+.shoot_balloon .balloon .balloon-display {
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: default;
 }
 
 .game_1024 {
@@ -38,6 +47,11 @@ html, body {
   margin: 0;
   text-align: center;
   vertical-align: middle;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: default;
 }
 .game_1024 .block.moving .block-display {
   color: red;

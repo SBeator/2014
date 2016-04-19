@@ -3,6 +3,8 @@
   height: 220px;
   position: relative;
   overflow: hidden;
+  margin: auto;
+  background-color: #40a070;
   @include border-box-sizing();
 
   .balloon {
@@ -11,5 +13,9 @@
 
     border-radius: 50%;
     background-color: #2b81af;
+
+    .balloon-display {
+      @include clickable-default();
+    }
   }
 }

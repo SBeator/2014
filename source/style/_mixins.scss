@@ -1,3 +1,15 @@
 @mixin border-box-sizing {
   box-sizing: border-box;
 }
+
+@mixin user-select-none {
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+@mixin clickable-default {
+  @include user-select-none();
+  cursor: default;
+}

@@ -19414,7 +19414,11 @@ module.exports = Game1024;
 },{"./../../Event.jsx":159,"./Block.jsx":160,"react":158}],162:[function(require,module,exports){
 var React = require("react");
 
+var Event = require("./../../Event.jsx");
+
 var Balloon = React.createClass({displayName: "Balloon",
+
+    mixins: [Event],
 
     sidePadding: 20,
 
@@ -19431,13 +19435,13 @@ var Balloon = React.createClass({displayName: "Balloon",
                 height: 200
             },
 
-            maxScore: 10,
+            maxScore: 16,
 
             maxSize: 50,
             minSize: 20,
 
             maxAnimationTime: 5,
-            minAnimationTime: 0.5
+            minAnimationTime: 2
         };
     },
 
@@ -19449,6 +19453,7 @@ var Balloon = React.createClass({displayName: "Balloon",
         var playgroundSize = this.props.playgroundSize;
 
         return {
+            show: true,
             top: playgroundSize.height + this.sidePadding,
             left: Math.random() * (playgroundSize.width - this.size.width - this.sidePadding * 2) + this.sidePadding
         };
@@ -19463,6 +19468,13 @@ var Balloon = React.createClass({displayName: "Balloon",
         }, 10);
     },
 
+    _handleClick: function() {
+        this.triggerEvent("score", this.props.hitScore);
+        this.setState({
+            show: false
+        });
+    },
+
     _getAnimationTime: function() {
         var animationTime = this.props.minAnimationTime + ( 1 - this._getScorePercent()) * (this.props.maxAnimationTime - this.props.minAnimationTime);
 
@@ -19470,7 +19482,7 @@ var Balloon = React.createClass({displayName: "Balloon",
     },
 
     _getSize: function() {
-        var size = this.props.minSize + this._getScorePercent() * (this.props.maxSize - this.props.minSize);
+        var size = this.props.maxSize - this._getScorePercent() * (this.props.maxSize - this.props.minSize);
 
         return {
             width: size,
@@ -19500,12 +19512,13 @@ var Balloon = React.createClass({displayName: "Balloon",
 
     _getStyle: function() {
         var style = {
+            display: this.state.show ? "block" : "none",
             top: this.state.top,
             left: this.state.left,
             width: this.size.width,
             height: this.size.height,
             lineHeight: this.size.height + "px",
-            transition: "all " + this.animationTime + "s"
+            transition: "all " + this.animationTime + "s linear"
         };
 
         return style;
@@ -19513,7 +19526,7 @@ var Balloon = React.createClass({displayName: "Balloon",
 
     render: function() {
         return (
-            React.createElement("div", {className: this._getClasses(), style: this._getStyle()}, 
+            React.createElement("div", {className: this._getClasses(), style: this._getStyle(), onClick: this._handleClick}, 
                 React.createElement("div", {className: "balloon-display"}, this.props.hitScore)
             ));
     }
@@ -19521,7 +19534,7 @@ var Balloon = React.createClass({displayName: "Balloon",
 
 module.exports = Balloon;
 
-},{"react":158}],163:[function(require,module,exports){
+},{"./../../Event.jsx":159,"react":158}],163:[function(require,module,exports){
 var React = require("react");
 
 var Balloon = require("./Balloon.jsx");
