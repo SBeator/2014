@@ -19035,641 +19035,723 @@ module.exports = validateDOMNesting;
 module.exports = require('./lib/React');
 
 },{"./lib/React":53}],159:[function(require,module,exports){
+'use strict';
+
 var eventHandlerMap = {};
 
 var Event = {
-    thisEventHandlerMap: {},
+  thisEventHandlerMap: {},
 
-    triggerEvent: function(name) {
-        var otherArguments = Array.prototype.slice.call(arguments, 1);
-        var _this = this;
+  triggerEvent: function triggerEvent(name) {
+    var otherArguments = Array.prototype.slice.call(arguments, 1);
+    var _this = this;
 
-        if(eventHandlerMap[name]) {
-            var handlers = eventHandlerMap[name];
-            handlers.forEach(function(handler) {
-                setTimeout(function() {
-                    handler.apply(_this, otherArguments);
-                }, 0);
-            });
-        }
-    },
-
-    bindEvent: function(name, callback) {
-        var handlers = eventHandlerMap[name] || [];
-        if(handlers.indexOf(callback) < 0) {
-            handlers.push(callback);
-        }
-
-        eventHandlerMap[name] = handlers;
-    },
-
-    unbindEvent: function(name, callback) {
-        var handlers = eventHandlerMap[name];
-        if(handlers) {
-            eventHandlerMap[name] = handlers.filter(function(handler) {
-                return handler != callback;
-            });
-        }
-
-        var thisHandlers = this.thisEventHandlerMap[name];
-        if(thisHandlers) {
-            this.thisEventHandlerMap[name] = thisHandlers.filter(function(handler) {
-                return handler != callback;
-            });
-        }
-    },
-
-    componentDidMount: function() {
-        if(this.events) {
-            for(var name in this.events) {
-                var callback = this.events[name];
-                if(callback) {
-                    if(typeof callback == "string" && this[callback]) {
-                        this.bindEvent(name, this[callback]);
-                    } else if(typeof callback == "function") {
-                        this.bindEvent(name, callback);
-                    }
-                } else {
-                    warning(true, "Bind event " + name + " fail, the callback is empty or undefined");
-                }
-            }
-        }
-    },
-
-    componentWillUnmount: function() {
-        for(var name in this.thisEventHandlerMap) {
-            var thisHandlers = this.thisEventHandlerMap[name];
-            var handlers = eventHandlerMap[name];
-            if(handlers) {
-                eventHandlerMap[name] = handlers.filter(this._checkIfHandlerInThisHandlers.bind(this, thisHandlers));
-            }
-        }
-    },
-
-    _checkIfHandlerInThisHandlers: function(thisHandlers, handler) {
-        return thisHandlers.indexOf(handler) < 0;
+    if (eventHandlerMap[name]) {
+      var handlers = eventHandlerMap[name];
+      handlers.forEach(function (handler) {
+        setTimeout(function () {
+          handler.apply(_this, otherArguments);
+        }, 0);
+      });
     }
+  },
+  bindEvent: function bindEvent(name, callback) {
+    var handlers = eventHandlerMap[name] || [];
+    if (handlers.indexOf(callback) < 0) {
+      handlers.push(callback);
+    }
+
+    eventHandlerMap[name] = handlers;
+  },
+  unbindEvent: function unbindEvent(name, callback) {
+    var handlers = eventHandlerMap[name];
+    if (handlers) {
+      eventHandlerMap[name] = handlers.filter(function (handler) {
+        return handler != callback;
+      });
+    }
+
+    var thisHandlers = this.thisEventHandlerMap[name];
+    if (thisHandlers) {
+      this.thisEventHandlerMap[name] = thisHandlers.filter(function (handler) {
+        return handler != callback;
+      });
+    }
+  },
+  componentDidMount: function componentDidMount() {
+    if (this.events) {
+      for (var name in this.events) {
+        var callback = this.events[name];
+        if (callback) {
+          if (typeof callback == 'string' && this[callback]) {
+            this.bindEvent(name, this[callback]);
+          } else if (typeof callback == 'function') {
+            this.bindEvent(name, callback);
+          }
+        } else {
+          warning(true, 'Bind event ' + name + ' fail, the callback is empty or undefined');
+        }
+      }
+    }
+  },
+  componentWillUnmount: function componentWillUnmount() {
+    for (var name in this.thisEventHandlerMap) {
+      var thisHandlers = this.thisEventHandlerMap[name];
+      var handlers = eventHandlerMap[name];
+      if (handlers) {
+        eventHandlerMap[name] = handlers.filter(this._checkIfHandlerInThisHandlers.bind(this, thisHandlers));
+      }
+    }
+  },
+  _checkIfHandlerInThisHandlers: function _checkIfHandlerInThisHandlers(thisHandlers, handler) {
+    return thisHandlers.indexOf(handler) < 0;
+  }
 };
 
 module.exports = Event;
 
 },{}],160:[function(require,module,exports){
-var React = require("react");
+'use strict';
 
-var Block = React.createClass({displayName: "Block",
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-    getDefaultProps: function() {
-        return {
-            size: {
-                width: 50,
-                height: 50
-            }
-        };
-    },
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-    _showText: function() {
-        return !!this.props.data.number;
-    },
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-    _needAnimation: function() {
-        return this.props.data.newPosition &&
-            !(this.props.data.newPosition.col == this.props.data.col &&
-            this.props.data.newPosition.row == this.props.data.row &&
-            this.props.data.newNumber == this.props.data.number);
-    },
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-    _getClasses: function() {
-        return "block" + (this._needAnimation() ? " moving" : "");
-    },
+var React = require('react');
 
-    _getStyle: function() {
-        var width = this.props.size.width;
-        var height = this.props.size.height;
+var propTypes = {
+  data: React.PropTypes.object,
+  size: React.PropTypes.object,
+  animationTime: React.PropTypes.number
+};
 
-        var style;
+var defaultProps = {
+  size: {
+    width: 50,
+    height: 50
+  }
+};
 
-        if(this._needAnimation()) {
-            style = {
-                transition: "all " + this.props.animationTime + "s",
-                zIndex: this.props.data.newPosition.zIndex,
-                left: this.props.data.newPosition.col * width,
-                top: this.props.data.newPosition.row * height,
-                width: width,
-                height: height
-            };
-        } else {
-            style = {
-                left: this.props.data.col * width,
-                top: this.props.data.row * height,
-                width: width,
-                height: height
-            };
-        }
+var Block = function (_React$Component) {
+  _inherits(Block, _React$Component);
 
-        return style;
+  function Block() {
+    _classCallCheck(this, Block);
 
-    },
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(Block).apply(this, arguments));
+  }
 
-    _getDisplayStyle: function() {
-        return this._needAnimation() ? { transition: "all " + this.props.animationTime + "s"} : {};
-    },
-
-    render: function() {
-        return (
-            React.createElement("div", {className: this._getClasses(), style: this._getStyle()}, 
-                React.createElement("div", {className: "block-display", style: this._getDisplayStyle()}, this.props.data.number)
-            ));
+  _createClass(Block, [{
+    key: 'getShowText',
+    value: function getShowText() {
+      return !!this.props.data.number;
     }
-});
+  }, {
+    key: 'getNeedAnimation',
+    value: function getNeedAnimation() {
+      return this.props.data.newPosition && !(this.props.data.newPosition.col === this.props.data.col && this.props.data.newPosition.row === this.props.data.row && this.props.data.newNumber === this.props.data.number);
+    }
+  }, {
+    key: 'getClasses',
+    value: function getClasses() {
+      return 'block ' + (this.getNeedAnimation() ? ' moving' : '');
+    }
+  }, {
+    key: 'getStyle',
+    value: function getStyle() {
+      var width = this.props.size.width;
+      var height = this.props.size.height;
+
+      var style = void 0;
+
+      if (this.getNeedAnimation()) {
+        style = {
+          transition: 'all ' + this.props.animationTime + 's',
+          zIndex: this.props.data.newPosition.zIndex,
+          left: this.props.data.newPosition.col * width,
+          top: this.props.data.newPosition.row * height,
+          width: width,
+          height: height
+        };
+      } else {
+        style = {
+          left: this.props.data.col * width,
+          top: this.props.data.row * height,
+          width: width,
+          height: height
+        };
+      }
+
+      return style;
+    }
+  }, {
+    key: 'getDisplayStyle',
+    value: function getDisplayStyle() {
+      return this.getNeedAnimation() ? { transition: 'all ' + this.props.animationTime + 's' } : {};
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      return React.createElement(
+        'div',
+        { className: this.getClasses(), style: this.getStyle() },
+        React.createElement(
+          'div',
+          { className: 'block-display', style: this.getDisplayStyle() },
+          this.props.data.number
+        )
+      );
+    }
+  }]);
+
+  return Block;
+}(React.Component);
+
+Block.propTypes = propTypes;
+Block.defaultProps = defaultProps;
 
 module.exports = Block;
 
 },{"react":158}],161:[function(require,module,exports){
-var React = require("react");
+'use strict';
 
-var Block = require("./Block.jsx");
-var Event = require("./../../Event.jsx");
+var React = require('react');
 
-var Game1024 = React.createClass({displayName: "Game1024",
-    mixins: [Event],
+var Block = require('./Block.jsx');
+var Event = require('./../../Event.jsx');
 
-    animationTime: 0.2,
+var Game1024 = React.createClass({
+  displayName: 'Game1024',
 
-    keyArrowMap: {
-        37: "left",
-        38: "up",
-        39: "right",
-        40: "bottom"
-    },
+  mixins: [Event],
 
-    numberMap: {},
+  animationTime: 0.2,
 
-    getDefaultProps: function() {
-        return {
-            table: {
-                col: 4,
-                row: 4
-            }
-        };
-    },
+  keyArrowMap: {
+    37: 'left',
+    38: 'up',
+    39: 'right',
+    40: 'bottom'
+  },
 
-    getInitialState: function () {
-        var playData = [];
-        var emptyNumber = 0;
+  numberMap: {},
 
-        var rowNumber = this.props.table.row;
-        var colNumber = this.props.table.col;
+  getDefaultProps: function getDefaultProps() {
+    return {
+      table: {
+        col: 4,
+        row: 4
+      }
+    };
+  },
+  getInitialState: function getInitialState() {
+    var playData = [];
+    var emptyNumber = 0;
 
-        for (var row = 0; row < rowNumber; row++) {
-            for (var col = 0; col < colNumber; col++) {
-                playData.push({
-                    row: row,
-                    col: col,
-                    number: 2
-                });
-            }
-        }
+    var rowNumber = this.props.table.row;
+    var colNumber = this.props.table.col;
 
-        playData[0].number = 4;
-        playData[3].number = 2;
-        playData[7].number = 2;
-
-        this.numberMap = {
-            'left':     [0,                     colNumber,  rowNumber, 1,           colNumber],
-            'up':       [0,                     1,          colNumber, colNumber,   rowNumber],
-            'right':    [colNumber-1,           colNumber,  rowNumber, -1,          colNumber],
-            'bottom':   [colNumber*rowNumber-1, -1,         colNumber, -colNumber,  rowNumber]
-        };
-
-        return {
-            playData: playData,
-            animation: false
-        };
-    },
-
-    componentDidMount: function() {
-        window.addEventListener("keydown", this._handleKeyDown);
-    },
-
-    _handleKeyDown: function(event) {
-        var key = this.keyArrowMap[event.keyCode];
-        if(key) {
-            this._moveUp(key);
-        }
-    },
-
-    _moveUp: function(key) {
-
-        var rowNumber = this.props.table.row;
-        var colNumber = this.props.table.col;
-
-        var paraArray = this.numberMap[key];
-
-        var startIndex = paraArray[0];
-        var changeIndex = paraArray[1];
-        var totalNumber = paraArray[2];
-        var currentChangeNumber = paraArray[3];
-        var currentTotalNumber = paraArray[4];
-
-        var startArray = [];
-        var startCount = 0;
-        for(var index = startIndex; startCount < totalNumber; index += changeIndex) {
-            var thisArray = [];
-            var thisCount = 0;
-            for(var thisIndex = index; thisCount < currentTotalNumber; thisIndex += currentChangeNumber) {
-                thisArray.push(thisIndex);
-                thisCount++;
-            }
-
-            startArray.push(thisArray);
-
-            startCount++;
-        }
-
-        var oldData = this.state.playData;
-        var newData = oldData.slice();
-
-        var emptyIndex = [];
-
-        var score = 0;
-
-        for(var sIndex = 0; sIndex < totalNumber; sIndex ++) {
-
-            var lastNumber = 0;
-            var newIndex = 0;
-
-            for(var tIndex = 0; tIndex < currentTotalNumber; tIndex ++) {
-                var rightIndex = startArray[sIndex][tIndex];
-
-                var thisData = oldData[rightIndex];
-                if (thisData.number) {
-                    var newDataobj;
-                    if(lastNumber != thisData.number) {
-                        newDataobj = newData[startArray[sIndex][newIndex]];
-                        newDataobj.newNumber = thisData.number;
-                        oldData[rightIndex].newPosition = {
-                            col: newDataobj.col,
-                            row: newDataobj.row,
-                            zIndex: 1,
-                        };
-                        lastNumber = thisData.number;
-                        newIndex++;
-                    } else {
-                        newDataobj = newData[startArray[sIndex][newIndex - 1]];
-                        newDataobj.newNumber = thisData.number * 2;
-                        oldData[rightIndex].newPosition = {
-                            col: newDataobj.col,
-                            row: newDataobj.row,
-                            zIndex: 0
-                        };
-                        lastNumber = 0;
-                        score += thisData.number;
-                    }
-                }
-            }
-
-            if(newIndex != currentTotalNumber) {
-                emptyIndex.push(startArray[sIndex][currentTotalNumber - 1]);
-            }
-
-            for(var i = newIndex; i<currentTotalNumber; i++) {
-                newData[startArray[sIndex][i]].newNumber = 0;
-            }
-        }
-
-        if(score) {
-            this.triggerEvent("score", score);
-            this.triggerEvent("score_1024", score);
-        }
-
-        if(emptyIndex.length) {
-            oldData[emptyIndex[(Math.random() * emptyIndex.length) | 0]].newNumber = 2;
-        }
-
-        var _this = this;
-        setTimeout(function() {
-            oldData.forEach(function(data) {
-                data.number = data.newNumber;
-                data.newPosition = null;
-            });
-
-            _this.setState({
-                playData: oldData,
-            });
-        }, this.animationTime * 1000);
-
-        this.setState({
-            playData: oldData,
-            animation: true
+    for (var row = 0; row < rowNumber; row++) {
+      for (var col = 0; col < colNumber; col++) {
+        playData.push({
+          row: row,
+          col: col,
+          number: 2
         });
-    },
-
-    _logData: function(data) {
-        var numberData = data.map(function(item) {
-            return item.number;
-        });
-
-        var rowNumber = this.props.table.row;
-        var colNumber = this.props.table.col;
-
-        for(var i = 0; i<rowNumber * colNumber; i+= colNumber ) {
-            console.log(numberData.slice(i, i + colNumber));
-        }
-
-    },
-
-    _getBlocks: function () {
-        var blockSize = this.props.block.size;
-        var rowNumber = this.props.table.row;
-        var animationTime = this.animationTime;
-
-        return this.state.playData.map(function(data) {
-            return (
-                 !!data.number ?
-                    (React.createElement(Block, {data: data, 
-                       size: blockSize, 
-                       animationTime: animationTime, 
-                       key: data.row * rowNumber + data.col})) :
-                    "");
-        });
-    },
-
-    _getStyle: function() {
-        return {
-            width: this.props.block.size.width * this.props.table.col,
-            height: this.props.block.size.height * this.props.table.row
-        };
-    },
-
-    render: function () {
-        return (
-            React.createElement("div", {className: "game_1024", style: this._getStyle(), onKeyPress: this._handleKeyDown}, 
-                this._getBlocks()
-            ));
+      }
     }
+
+    playData[0].number = 4;
+    playData[3].number = 2;
+    playData[7].number = 2;
+
+    this.numberMap = {
+      'left': [0, colNumber, rowNumber, 1, colNumber],
+      'up': [0, 1, colNumber, colNumber, rowNumber],
+      'right': [colNumber - 1, colNumber, rowNumber, -1, colNumber],
+      'bottom': [colNumber * rowNumber - 1, -1, colNumber, -colNumber, rowNumber]
+    };
+
+    return {
+      playData: playData,
+      animation: false
+    };
+  },
+  componentDidMount: function componentDidMount() {
+    window.addEventListener('keydown', this._handleKeyDown);
+  },
+  _handleKeyDown: function _handleKeyDown(event) {
+    var key = this.keyArrowMap[event.keyCode];
+    if (key) {
+      this._moveUp(key);
+    }
+  },
+  _moveUp: function _moveUp(key) {
+    var rowNumber = this.props.table.row;
+    var colNumber = this.props.table.col;
+
+    var paraArray = this.numberMap[key];
+
+    var startIndex = paraArray[0];
+    var changeIndex = paraArray[1];
+    var totalNumber = paraArray[2];
+    var currentChangeNumber = paraArray[3];
+    var currentTotalNumber = paraArray[4];
+
+    var startArray = [];
+    var startCount = 0;
+    for (var index = startIndex; startCount < totalNumber; index += changeIndex) {
+      var thisArray = [];
+      var thisCount = 0;
+      for (var thisIndex = index; thisCount < currentTotalNumber; thisIndex += currentChangeNumber) {
+        thisArray.push(thisIndex);
+        thisCount++;
+      }
+
+      startArray.push(thisArray);
+
+      startCount++;
+    }
+
+    var oldData = this.state.playData;
+    var newData = oldData.slice();
+
+    var emptyIndex = [];
+
+    var score = 0;
+
+    for (var sIndex = 0; sIndex < totalNumber; sIndex++) {
+      var lastNumber = 0;
+      var newIndex = 0;
+
+      for (var tIndex = 0; tIndex < currentTotalNumber; tIndex++) {
+        var rightIndex = startArray[sIndex][tIndex];
+
+        var thisData = oldData[rightIndex];
+        if (thisData.number) {
+          var newDataobj;
+          if (lastNumber != thisData.number) {
+            newDataobj = newData[startArray[sIndex][newIndex]];
+            newDataobj.newNumber = thisData.number;
+            oldData[rightIndex].newPosition = {
+              col: newDataobj.col,
+              row: newDataobj.row,
+              zIndex: 1
+            };
+            lastNumber = thisData.number;
+            newIndex++;
+          } else {
+            newDataobj = newData[startArray[sIndex][newIndex - 1]];
+            newDataobj.newNumber = thisData.number * 2;
+            oldData[rightIndex].newPosition = {
+              col: newDataobj.col,
+              row: newDataobj.row,
+              zIndex: 0
+            };
+            lastNumber = 0;
+            score += thisData.number;
+          }
+        }
+      }
+
+      if (newIndex != currentTotalNumber) {
+        emptyIndex.push(startArray[sIndex][currentTotalNumber - 1]);
+      }
+
+      for (var i = newIndex; i < currentTotalNumber; i++) {
+        newData[startArray[sIndex][i]].newNumber = 0;
+      }
+    }
+
+    if (score) {
+      this.triggerEvent('score', score);
+      this.triggerEvent('score_1024', score);
+    }
+
+    if (emptyIndex.length) {
+      oldData[emptyIndex[Math.random() * emptyIndex.length | 0]].newNumber = 2;
+    }
+
+    var _this = this;
+    setTimeout(function () {
+      oldData.forEach(function (data) {
+        data.number = data.newNumber;
+        data.newPosition = null;
+      });
+
+      _this.setState({
+        playData: oldData
+      });
+    }, this.animationTime * 1000);
+
+    this.setState({
+      playData: oldData,
+      animation: true
+    });
+  },
+  _logData: function _logData(data) {
+    var numberData = data.map(function (item) {
+      return item.number;
+    });
+
+    var rowNumber = this.props.table.row;
+    var colNumber = this.props.table.col;
+
+    for (var i = 0; i < rowNumber * colNumber; i += colNumber) {
+      console.log(numberData.slice(i, i + colNumber));
+    }
+  },
+  _getBlocks: function _getBlocks() {
+    var blockSize = this.props.block.size;
+    var rowNumber = this.props.table.row;
+    var animationTime = this.animationTime;
+
+    return this.state.playData.map(function (data) {
+      return !!data.number ? React.createElement(Block, { data: data,
+        size: blockSize,
+        animationTime: animationTime,
+        key: data.row * rowNumber + data.col
+      }) : '';
+    });
+  },
+  _getStyle: function _getStyle() {
+    return {
+      width: this.props.block.size.width * this.props.table.col,
+      height: this.props.block.size.height * this.props.table.row
+    };
+  },
+  render: function render() {
+    return React.createElement(
+      'div',
+      { className: 'game_1024', style: this._getStyle(), onKeyPress: this._handleKeyDown },
+      this._getBlocks()
+    );
+  }
 });
 
 module.exports = Game1024;
 
 },{"./../../Event.jsx":159,"./Block.jsx":160,"react":158}],162:[function(require,module,exports){
-var React = require("react");
+'use strict';
 
-var Event = require("./../../Event.jsx");
+var React = require('react');
 
-var Balloon = React.createClass({displayName: "Balloon",
+var Event = require('./../../Event.jsx');
 
-    mixins: [Event],
-
-    sidePadding: 20,
-
-    animationTime: 1,
-    size: {
-        width: 20,
-        height: 20
-    },
-
-    getDefaultProps: function() {
-        return {
-            playgroundSize: {
-                width: 200,
-                height: 200
-            },
-
-            maxScore: 16,
-
-            maxSize: 50,
-            minSize: 20,
-
-            maxAnimationTime: 5,
-            minAnimationTime: 2
-        };
-    },
-
-    getInitialState: function() {
-
-        this.size = this._getSize();
-        this.animationTime = this._getAnimationTime();
-
-        var playgroundSize = this.props.playgroundSize;
-
-        return {
-            show: true,
-            top: playgroundSize.height + this.sidePadding,
-            left: Math.random() * (playgroundSize.width - this.size.width - this.sidePadding * 2) + this.sidePadding
-        };
-    },
-
-    componentDidMount: function() {
-        var _this = this;
-        setTimeout(function() {
-            _this.setState({
-               top: -_this.size.height
-            });
-        }, 10);
-    },
-
-    _handleClick: function() {
-        this.triggerEvent("score", this.props.hitScore);
-        this.setState({
-            show: false
-        });
-    },
-
-    _getAnimationTime: function() {
-        var animationTime = this.props.minAnimationTime + ( 1 - this._getScorePercent()) * (this.props.maxAnimationTime - this.props.minAnimationTime);
-
-        return animationTime;
-    },
-
-    _getSize: function() {
-        var size = this.props.maxSize - this._getScorePercent() * (this.props.maxSize - this.props.minSize);
-
-        return {
-            width: size,
-            height: size
-        };
-    },
-
-    _getScorePercent: function() {
-        var maxScore = this.props.maxScore;
-        var score = this.props.hitScore;
-
-        // warning(typeof(score) != "number", "score is not a number");
-
-        if (score < 0) {
-            score = 0;
-        } else if (score > this.props.maxScore) {
-            score = this.props.maxScore;
-        }
-
-        return score / maxScore;
-    },
+var Balloon = React.createClass({
+  displayName: 'Balloon',
 
 
-    _getClasses: function() {
-        return "balloon";
-    },
+  mixins: [Event],
 
-    _getStyle: function() {
-        var style = {
-            display: this.state.show ? "block" : "none",
-            top: this.state.top,
-            left: this.state.left,
-            width: this.size.width,
-            height: this.size.height,
-            lineHeight: this.size.height + "px",
-            transition: "all " + this.animationTime + "s linear"
-        };
+  sidePadding: 20,
 
-        return style;
-    },
+  animationTime: 1,
+  size: {
+    width: 20,
+    height: 20
+  },
 
-    render: function() {
-        return (
-            React.createElement("div", {className: this._getClasses(), style: this._getStyle(), onClick: this._handleClick}, 
-                React.createElement("div", {className: "balloon-display"}, this.props.hitScore)
-            ));
+  getDefaultProps: function getDefaultProps() {
+    return {
+      playgroundSize: {
+        width: 200,
+        height: 200
+      },
+
+      maxScore: 16,
+
+      maxSize: 50,
+      minSize: 20,
+
+      maxAnimationTime: 5,
+      minAnimationTime: 2
+    };
+  },
+  getInitialState: function getInitialState() {
+    this.size = this._getSize();
+    this.animationTime = this._getAnimationTime();
+
+    var playgroundSize = this.props.playgroundSize;
+
+    return {
+      show: true,
+      top: playgroundSize.height + this.sidePadding,
+      left: Math.random() * (playgroundSize.width - this.size.width - this.sidePadding * 2) + this.sidePadding
+    };
+  },
+  componentDidMount: function componentDidMount() {
+    var _this = this;
+    setTimeout(function () {
+      _this.setState({
+        top: -_this.size.height
+      });
+    }, 10);
+  },
+  _handleClick: function _handleClick() {
+    this.triggerEvent('score', this.props.hitScore);
+    this.setState({
+      show: false
+    });
+  },
+  _getAnimationTime: function _getAnimationTime() {
+    var animationTime = this.props.minAnimationTime + (1 - this._getScorePercent()) * (this.props.maxAnimationTime - this.props.minAnimationTime);
+
+    return animationTime;
+  },
+  _getSize: function _getSize() {
+    var size = this.props.maxSize - this._getScorePercent() * (this.props.maxSize - this.props.minSize);
+
+    return {
+      width: size,
+      height: size
+    };
+  },
+  _getScorePercent: function _getScorePercent() {
+    var maxScore = this.props.maxScore;
+    var score = this.props.hitScore;
+
+    // warning(typeof(score) != "number", "score is not a number");
+
+    if (score < 0) {
+      score = 0;
+    } else if (score > this.props.maxScore) {
+      score = this.props.maxScore;
     }
+
+    return score / maxScore;
+  },
+  _getClasses: function _getClasses() {
+    return 'balloon';
+  },
+  _getStyle: function _getStyle() {
+    var style = {
+      display: this.state.show ? 'block' : 'none',
+      top: this.state.top,
+      left: this.state.left,
+      width: this.size.width,
+      height: this.size.height,
+      lineHeight: this.size.height + 'px',
+      transition: 'all ' + this.animationTime + 's linear'
+    };
+
+    return style;
+  },
+  render: function render() {
+    return React.createElement(
+      'div',
+      { className: this._getClasses(), style: this._getStyle(), onClick: this._handleClick },
+      React.createElement(
+        'div',
+        { className: 'balloon-display' },
+        this.props.hitScore
+      )
+    );
+  }
 });
 
 module.exports = Balloon;
 
 },{"./../../Event.jsx":159,"react":158}],163:[function(require,module,exports){
-var React = require("react");
+'use strict';
 
-var Balloon = require("./Balloon.jsx");
+var React = require('react');
 
-var Event = require("./../../Event.jsx");
+var Balloon = require('./Balloon.jsx');
 
-var ShootBalloon = React.createClass({displayName: "ShootBalloon",
-    mixins: [Event],
+var Event = require('./../../Event.jsx');
 
-    getInitialState: function () {
-        return {
-            balloons: []
-        };
-    },
+var ShootBalloon = React.createClass({
+  displayName: 'ShootBalloon',
 
-    componentDidMount: function() {
-        this.bindEvent("score_1024", this._addBalloon);
-    },
+  mixins: [Event],
 
-    _addBalloon: function(hitScore) {
-        var balloons = this.state.balloons;
+  getInitialState: function getInitialState() {
+    return {
+      balloons: []
+    };
+  },
+  componentDidMount: function componentDidMount() {
+    this.bindEvent('score_1024', this._addBalloon);
+  },
+  _addBalloon: function _addBalloon(hitScore) {
+    var balloons = this.state.balloons;
 
-        balloons.push({
-            key: Date.now(),
-            hitScore: hitScore
-        });
+    balloons.push({
+      key: Date.now(),
+      hitScore: hitScore
+    });
 
-        this.setState({
-            balloons: balloons
-        });
-    },
-
-    _getBalloons: function () {
-
-        return this.state.balloons.map(function(balloon) {
-            return (React.createElement(Balloon, {hitScore: balloon.hitScore, key: balloon.key}));
-        });
-    },
-
-    render: function () {
-        return (
-            React.createElement("div", {className: "shoot_balloon"}, 
-                this._getBalloons()
-            ));
-    }
+    this.setState({
+      balloons: balloons
+    });
+  },
+  _getBalloons: function _getBalloons() {
+    return this.state.balloons.map(function (balloon) {
+      return React.createElement(Balloon, { hitScore: balloon.hitScore, key: balloon.key });
+    });
+  },
+  render: function render() {
+    return React.createElement(
+      'div',
+      { className: 'shoot_balloon' },
+      this._getBalloons()
+    );
+  }
 });
 
 module.exports = ShootBalloon;
 
 },{"./../../Event.jsx":159,"./Balloon.jsx":162,"react":158}],164:[function(require,module,exports){
-var React = require("react");
+'use strict';
 
-var Game1024 = require("./Games/1024/Game1024.jsx");
-var ShootBalloon = require("./Games/ShootBalloon/ShootBalloon.jsx");
-var Score = require("./Score.jsx");
+var React = require('react');
 
-var Main = React.createClass({displayName: "Main",
-    render: function() {
-        return (
-            React.createElement("div", {className: "main"}, 
-                React.createElement(Game1024, {table: this.props.data.table, block: this.props.data.block}), 
-                React.createElement(ShootBalloon, null), 
-                React.createElement(Score, null)
-            ));
-    }
-});
+var Game1024 = require('./Games/1024/Game1024.jsx');
+var ShootBalloon = require('./Games/ShootBalloon/ShootBalloon.jsx');
+var Score = require('./Score.jsx');
+
+var propTypes = {
+  data: React.PropTypes.object
+};
+
+// const Main = React.createClass({
+//   render() {
+//     return (
+//       <div className="main">
+//         <Game1024 table={this.props.data.table} block={this.props.data.block} />
+//         <ShootBalloon />
+//         <Score />
+//       </div>);
+//   }
+// });
+
+// class Main extends React.Component {
+//   render() {
+//     return (
+//       <div className="main">
+//         <Game1024 table={this.props.data.table} block={this.props.data.block} />
+//         <ShootBalloon />
+//         <Score />
+//       </div>);
+//   }
+// }
+
+function Main(_ref) {
+  var data = _ref.data;
+
+  return React.createElement(
+    'div',
+    { className: 'main' },
+    React.createElement(Game1024, { table: data.table, block: data.block }),
+    React.createElement(ShootBalloon, null),
+    React.createElement(Score, null)
+  );
+}
+
+Main.propTypes = propTypes;
 
 module.exports = Main;
 
 },{"./Games/1024/Game1024.jsx":161,"./Games/ShootBalloon/ShootBalloon.jsx":163,"./Score.jsx":165,"react":158}],165:[function(require,module,exports){
-var React = require("react");
+"use strict";
 
-var Event = require("./Event.jsx");
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var Score = React.createClass({displayName: "Score",
-    mixins: [Event],
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-    events: {
-        "score": "_handleScoreChange"
-    },
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-    getDefaultProps: function() {
-        return {
-            score: 0
-        };
-    },
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-    getInitialState: function () {
-        return {
-            score: this.props.score
-        };
-    },
+var React = require('react');
 
-    //componentDidMount: function() {
-    //    this.bindEvent("score", this._handleScoreChange);
-    //},
+// const Event = require('./Event.jsx');
 
-    _handleScoreChange: function(changeScore) {
-        this.setState({
-           score: this.state.score + changeScore
-        });
-    },
+var propTypes = {
+  score: React.PropTypes.number
+};
 
-    render: function() {
-        return (
-            React.createElement("div", {className: "score"}, 
-                this.state.score
-            ));
+var defaultProps = {
+  score: 0
+};
+
+var Score = function (_React$Component) {
+  _inherits(Score, _React$Component);
+
+  // mixins: [Event],
+
+  // events: {
+  //   score: '_handleScoreChange'
+  // },
+
+  function Score(props) {
+    _classCallCheck(this, Score);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Score).call(this, props));
+
+    _this.state = {
+      score: _this.props.score
+    };
+    return _this;
+  }
+
+  // componentDidMount: function() {
+  //    this.bindEvent("score", this._handleScoreChange);
+  // },
+
+  _createClass(Score, [{
+    key: "_handleScoreChange",
+    value: function _handleScoreChange(changeScore) {
+      this.setState({
+        score: this.state.score + changeScore
+      });
     }
-});
+  }, {
+    key: "render",
+    value: function render() {
+      return React.createElement(
+        "div",
+        { className: "score" },
+        this.state.score
+      );
+    }
+  }]);
+
+  return Score;
+}(React.Component);
+
+Score.propTypes = propTypes;
+Score.defaultProps = defaultProps;
 
 module.exports = Score;
 
-},{"./Event.jsx":159,"react":158}],166:[function(require,module,exports){
+},{"react":158}],166:[function(require,module,exports){
+'use strict';
+
 var React = require('react');
 var ReactDOM = require('react-dom');
 
 var Main = require('./React/Main.jsx');
 
 var data = {
-    table: {
-        col: 4,
-        row: 4
-    },
+  table: {
+    col: 4,
+    row: 4
+  },
 
-    block: {
-        size: {
-            width: 50,
-            height: 50
-        }
+  block: {
+    size: {
+      width: 50,
+      height: 50
     }
+  }
 };
 
-ReactDOM.render(
-    (React.createElement(Main, {data: data})),
-    document.getElementById('content'));
+ReactDOM.render(React.createElement(Main, { data: data }), document.getElementById('content'));
 
 },{"./React/Main.jsx":164,"react":158,"react-dom":29}]},{},[159,160,161,162,163,164,165,166]);

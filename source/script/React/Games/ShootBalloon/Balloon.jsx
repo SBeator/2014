@@ -1,121 +1,120 @@
-var React = require("react");
+var React = require('react');
 
-var Event = require("./../../Event.jsx");
+var Event = require('./../../Event.jsx');
 
 var Balloon = React.createClass({
 
-    mixins: [Event],
+  mixins: [Event],
 
-    sidePadding: 20,
+  sidePadding: 20,
 
-    animationTime: 1,
-    size: {
-        width: 20,
-        height: 20
-    },
+  animationTime: 1,
+  size: {
+    width: 20,
+    height: 20
+  },
 
-    getDefaultProps: function() {
-        return {
-            playgroundSize: {
-                width: 200,
-                height: 200
-            },
+  getDefaultProps() {
+    return {
+      playgroundSize: {
+        width: 200,
+        height: 200
+      },
 
-            maxScore: 16,
+      maxScore: 16,
 
-            maxSize: 50,
-            minSize: 20,
+      maxSize: 50,
+      minSize: 20,
 
-            maxAnimationTime: 5,
-            minAnimationTime: 2
-        };
-    },
+      maxAnimationTime: 5,
+      minAnimationTime: 2
+    };
+  },
 
-    getInitialState: function() {
+  getInitialState() {
+    this.size = this._getSize();
+    this.animationTime = this._getAnimationTime();
 
-        this.size = this._getSize();
-        this.animationTime = this._getAnimationTime();
+    var playgroundSize = this.props.playgroundSize;
 
-        var playgroundSize = this.props.playgroundSize;
+    return {
+      show: true,
+      top: playgroundSize.height + this.sidePadding,
+      left: Math.random() * (playgroundSize.width - this.size.width - this.sidePadding * 2) + this.sidePadding
+    };
+  },
 
-        return {
-            show: true,
-            top: playgroundSize.height + this.sidePadding,
-            left: Math.random() * (playgroundSize.width - this.size.width - this.sidePadding * 2) + this.sidePadding
-        };
-    },
+  componentDidMount() {
+    var _this = this;
+    setTimeout(function () {
+      _this.setState({
+        top: -_this.size.height
+      });
+    }, 10);
+  },
 
-    componentDidMount: function() {
-        var _this = this;
-        setTimeout(function() {
-            _this.setState({
-               top: -_this.size.height
-            });
-        }, 10);
-    },
+  _handleClick() {
+    this.triggerEvent('score', this.props.hitScore);
+    this.setState({
+      show: false
+    });
+  },
 
-    _handleClick: function() {
-        this.triggerEvent("score", this.props.hitScore);
-        this.setState({
-            show: false
-        });
-    },
+  _getAnimationTime() {
+    var animationTime = this.props.minAnimationTime + (1 - this._getScorePercent()) * (this.props.maxAnimationTime - this.props.minAnimationTime);
 
-    _getAnimationTime: function() {
-        var animationTime = this.props.minAnimationTime + ( 1 - this._getScorePercent()) * (this.props.maxAnimationTime - this.props.minAnimationTime);
+    return animationTime;
+  },
 
-        return animationTime;
-    },
+  _getSize() {
+    var size = this.props.maxSize - this._getScorePercent() * (this.props.maxSize - this.props.minSize);
 
-    _getSize: function() {
-        var size = this.props.maxSize - this._getScorePercent() * (this.props.maxSize - this.props.minSize);
+    return {
+      width: size,
+      height: size
+    };
+  },
 
-        return {
-            width: size,
-            height: size
-        };
-    },
+  _getScorePercent() {
+    var maxScore = this.props.maxScore;
+    var score = this.props.hitScore;
 
-    _getScorePercent: function() {
-        var maxScore = this.props.maxScore;
-        var score = this.props.hitScore;
+    // warning(typeof(score) != "number", "score is not a number");
 
-        // warning(typeof(score) != "number", "score is not a number");
-
-        if (score < 0) {
-            score = 0;
-        } else if (score > this.props.maxScore) {
-            score = this.props.maxScore;
-        }
-
-        return score / maxScore;
-    },
-
-
-    _getClasses: function() {
-        return "balloon";
-    },
-
-    _getStyle: function() {
-        var style = {
-            display: this.state.show ? "block" : "none",
-            top: this.state.top,
-            left: this.state.left,
-            width: this.size.width,
-            height: this.size.height,
-            lineHeight: this.size.height + "px",
-            transition: "all " + this.animationTime + "s linear"
-        };
-
-        return style;
-    },
-
-    render: function() {
-        return (
-            <div className={this._getClasses()} style={this._getStyle()} onClick={this._handleClick}>
-                <div className="balloon-display">{this.props.hitScore}</div>
-            </div>);
+    if (score < 0) {
+      score = 0;
+    } else if (score > this.props.maxScore) {
+      score = this.props.maxScore;
     }
+
+    return score / maxScore;
+  },
+
+
+  _getClasses() {
+    return 'balloon';
+  },
+
+  _getStyle() {
+    var style = {
+      display: this.state.show ? 'block' : 'none',
+      top: this.state.top,
+      left: this.state.left,
+      width: this.size.width,
+      height: this.size.height,
+      lineHeight: this.size.height + 'px',
+      transition: 'all ' + this.animationTime + 's linear'
+    };
+
+    return style;
+  },
+
+  render() {
+    return (
+      <div className={this._getClasses()} style={this._getStyle()} onClick={this._handleClick}>
+        <div className="balloon-display">{this.props.hitScore}</div>
+      </div>);
+  }
 });
 
 module.exports = Balloon;

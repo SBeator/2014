@@ -1,48 +1,47 @@
-var React = require("react");
+var React = require('react');
 
-var Balloon = require("./Balloon.jsx");
+var Balloon = require('./Balloon.jsx');
 
-var Event = require("./../../Event.jsx");
+var Event = require('./../../Event.jsx');
 
 var ShootBalloon = React.createClass({
-    mixins: [Event],
+  mixins: [Event],
 
-    getInitialState: function () {
-        return {
-            balloons: []
-        };
-    },
+  getInitialState() {
+    return {
+      balloons: []
+    };
+  },
 
-    componentDidMount: function() {
-        this.bindEvent("score_1024", this._addBalloon);
-    },
+  componentDidMount() {
+    this.bindEvent('score_1024', this._addBalloon);
+  },
 
-    _addBalloon: function(hitScore) {
-        var balloons = this.state.balloons;
+  _addBalloon(hitScore) {
+    var balloons = this.state.balloons;
 
-        balloons.push({
-            key: Date.now(),
-            hitScore: hitScore
-        });
+    balloons.push({
+      key: Date.now(),
+      hitScore
+    });
 
-        this.setState({
-            balloons: balloons
-        });
-    },
+    this.setState({
+      balloons
+    });
+  },
 
-    _getBalloons: function () {
+  _getBalloons() {
+    return this.state.balloons.map(function (balloon) {
+      return (<Balloon hitScore={balloon.hitScore} key={balloon.key} />);
+    });
+  },
 
-        return this.state.balloons.map(function(balloon) {
-            return (<Balloon hitScore={balloon.hitScore} key={balloon.key} />);
-        });
-    },
-
-    render: function () {
-        return (
-            <div className="shoot_balloon">
-                {this._getBalloons()}
-            </div>);
-    }
+  render() {
+    return (
+      <div className="shoot_balloon">
+        {this._getBalloons()}
+      </div>);
+  }
 });
 
 module.exports = ShootBalloon;

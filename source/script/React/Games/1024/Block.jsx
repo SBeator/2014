@@ -1,69 +1,74 @@
-var React = require("react");
+const React = require('react');
 
-var Block = React.createClass({
+const propTypes = {
+  data: React.PropTypes.object,
+  size: React.PropTypes.object,
+  animationTime: React.PropTypes.number
+};
 
-    getDefaultProps: function() {
-        return {
-            size: {
-                width: 50,
-                height: 50
-            }
-        };
-    },
+const defaultProps = {
+  size: {
+    width: 50,
+    height: 50
+  }
+};
 
-    _showText: function() {
-        return !!this.props.data.number;
-    },
+class Block extends React.Component {
+  getShowText() {
+    return !!this.props.data.number;
+  }
 
-    _needAnimation: function() {
-        return this.props.data.newPosition &&
-            !(this.props.data.newPosition.col == this.props.data.col &&
-            this.props.data.newPosition.row == this.props.data.row &&
-            this.props.data.newNumber == this.props.data.number);
-    },
+  getNeedAnimation() {
+    return this.props.data.newPosition &&
+      !(this.props.data.newPosition.col === this.props.data.col &&
+        this.props.data.newPosition.row === this.props.data.row &&
+        this.props.data.newNumber === this.props.data.number);
+  }
 
-    _getClasses: function() {
-        return "block" + (this._needAnimation() ? " moving" : "");
-    },
+  getClasses() {
+    return `block ${this.getNeedAnimation() ? ' moving' : ''}`;
+  }
 
-    _getStyle: function() {
-        var width = this.props.size.width;
-        var height = this.props.size.height;
+  getStyle() {
+    const width = this.props.size.width;
+    const height = this.props.size.height;
 
-        var style;
+    let style;
 
-        if(this._needAnimation()) {
-            style = {
-                transition: "all " + this.props.animationTime + "s",
-                zIndex: this.props.data.newPosition.zIndex,
-                left: this.props.data.newPosition.col * width,
-                top: this.props.data.newPosition.row * height,
-                width: width,
-                height: height
-            };
-        } else {
-            style = {
-                left: this.props.data.col * width,
-                top: this.props.data.row * height,
-                width: width,
-                height: height
-            };
-        }
-
-        return style;
-
-    },
-
-    _getDisplayStyle: function() {
-        return this._needAnimation() ? { transition: "all " + this.props.animationTime + "s"} : {};
-    },
-
-    render: function() {
-        return (
-            <div className={this._getClasses()} style={this._getStyle()}>
-                <div className="block-display" style={this._getDisplayStyle()}>{this.props.data.number}</div>
-            </div>);
+    if (this.getNeedAnimation()) {
+      style = {
+        transition: `all ${this.props.animationTime}s`,
+        zIndex: this.props.data.newPosition.zIndex,
+        left: this.props.data.newPosition.col * width,
+        top: this.props.data.newPosition.row * height,
+        width,
+        height
+      };
+    } else {
+      style = {
+        left: this.props.data.col * width,
+        top: this.props.data.row * height,
+        width,
+        height
+      };
     }
-});
+
+    return style;
+  }
+
+  getDisplayStyle() {
+    return this.getNeedAnimation() ? { transition: `all ${this.props.animationTime}s` } : {};
+  }
+
+  render() {
+    return (
+      <div className={this.getClasses()} style={this.getStyle()}>
+        <div className="block-display" style={this.getDisplayStyle()}>{this.props.data.number}</div>
+      </div>);
+  }
+}
+
+Block.propTypes = propTypes;
+Block.defaultProps = defaultProps;
 
 module.exports = Block;

@@ -1,18 +1,44 @@
-var React = require("react");
+const React = require('react');
 
-var Game1024 = require("./Games/1024/Game1024.jsx");
-var ShootBalloon = require("./Games/ShootBalloon/ShootBalloon.jsx");
-var Score = require("./Score.jsx");
+const Game1024 = require('./Games/1024/Game1024.jsx');
+const ShootBalloon = require('./Games/ShootBalloon/ShootBalloon.jsx');
+const Score = require('./Score.jsx');
 
-var Main = React.createClass({
-    render: function() {
-        return (
-            <div className="main">
-                <Game1024 table={this.props.data.table} block={this.props.data.block} />
-                <ShootBalloon />
-                <Score />
-            </div>);
-    }
-});
+const propTypes = {
+  data: React.PropTypes.object
+};
+
+// const Main = React.createClass({
+//   render() {
+//     return (
+//       <div className="main">
+//         <Game1024 table={this.props.data.table} block={this.props.data.block} />
+//         <ShootBalloon />
+//         <Score />
+//       </div>);
+//   }
+// });
+
+// class Main extends React.Component {
+//   render() {
+//     return (
+//       <div className="main">
+//         <Game1024 table={this.props.data.table} block={this.props.data.block} />
+//         <ShootBalloon />
+//         <Score />
+//       </div>);
+//   }
+// }
+
+function Main({ data }) {
+  return (
+    <div className="main">
+      <Game1024 table={data.table} block={data.block} />
+      <ShootBalloon />
+      <Score />
+    </div>);
+}
+
+Main.propTypes = propTypes;
 
 module.exports = Main;

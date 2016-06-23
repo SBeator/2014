@@ -1,225 +1,223 @@
-var React = require("react");
+const React = require('react');
 
-var Block = require("./Block.jsx");
-var Event = require("./../../Event.jsx");
+const Block = require('./Block.jsx');
+const Event = require('./../../Event.jsx');
 
-var Game1024 = React.createClass({
-    mixins: [Event],
+const Game1024 = React.createClass({
+  mixins: [Event],
 
-    animationTime: 0.2,
+  animationTime: 0.2,
 
-    keyArrowMap: {
-        37: "left",
-        38: "up",
-        39: "right",
-        40: "bottom"
-    },
+  keyArrowMap: {
+    37: 'left',
+    38: 'up',
+    39: 'right',
+    40: 'bottom'
+  },
 
-    numberMap: {},
+  numberMap: {},
 
-    getDefaultProps: function() {
-        return {
-            table: {
-                col: 4,
-                row: 4
-            }
-        };
-    },
+  getDefaultProps() {
+    return {
+      table: {
+        col: 4,
+        row: 4
+      }
+    };
+  },
 
-    getInitialState: function () {
-        var playData = [];
-        var emptyNumber = 0;
+  getInitialState() {
+    const playData = [];
+    let emptyNumber = 0;
 
-        var rowNumber = this.props.table.row;
-        var colNumber = this.props.table.col;
+    const rowNumber = this.props.table.row;
+    const colNumber = this.props.table.col;
 
-        for (var row = 0; row < rowNumber; row++) {
-            for (var col = 0; col < colNumber; col++) {
-                playData.push({
-                    row: row,
-                    col: col,
-                    number: 2
-                });
-            }
-        }
-
-        playData[0].number = 4;
-        playData[3].number = 2;
-        playData[7].number = 2;
-
-        this.numberMap = {
-            'left':     [0,                     colNumber,  rowNumber, 1,           colNumber],
-            'up':       [0,                     1,          colNumber, colNumber,   rowNumber],
-            'right':    [colNumber-1,           colNumber,  rowNumber, -1,          colNumber],
-            'bottom':   [colNumber*rowNumber-1, -1,         colNumber, -colNumber,  rowNumber]
-        };
-
-        return {
-            playData: playData,
-            animation: false
-        };
-    },
-
-    componentDidMount: function() {
-        window.addEventListener("keydown", this._handleKeyDown);
-    },
-
-    _handleKeyDown: function(event) {
-        var key = this.keyArrowMap[event.keyCode];
-        if(key) {
-            this._moveUp(key);
-        }
-    },
-
-    _moveUp: function(key) {
-
-        var rowNumber = this.props.table.row;
-        var colNumber = this.props.table.col;
-
-        var paraArray = this.numberMap[key];
-
-        var startIndex = paraArray[0];
-        var changeIndex = paraArray[1];
-        var totalNumber = paraArray[2];
-        var currentChangeNumber = paraArray[3];
-        var currentTotalNumber = paraArray[4];
-
-        var startArray = [];
-        var startCount = 0;
-        for(var index = startIndex; startCount < totalNumber; index += changeIndex) {
-            var thisArray = [];
-            var thisCount = 0;
-            for(var thisIndex = index; thisCount < currentTotalNumber; thisIndex += currentChangeNumber) {
-                thisArray.push(thisIndex);
-                thisCount++;
-            }
-
-            startArray.push(thisArray);
-
-            startCount++;
-        }
-
-        var oldData = this.state.playData;
-        var newData = oldData.slice();
-
-        var emptyIndex = [];
-
-        var score = 0;
-
-        for(var sIndex = 0; sIndex < totalNumber; sIndex ++) {
-
-            var lastNumber = 0;
-            var newIndex = 0;
-
-            for(var tIndex = 0; tIndex < currentTotalNumber; tIndex ++) {
-                var rightIndex = startArray[sIndex][tIndex];
-
-                var thisData = oldData[rightIndex];
-                if (thisData.number) {
-                    var newDataobj;
-                    if(lastNumber != thisData.number) {
-                        newDataobj = newData[startArray[sIndex][newIndex]];
-                        newDataobj.newNumber = thisData.number;
-                        oldData[rightIndex].newPosition = {
-                            col: newDataobj.col,
-                            row: newDataobj.row,
-                            zIndex: 1,
-                        };
-                        lastNumber = thisData.number;
-                        newIndex++;
-                    } else {
-                        newDataobj = newData[startArray[sIndex][newIndex - 1]];
-                        newDataobj.newNumber = thisData.number * 2;
-                        oldData[rightIndex].newPosition = {
-                            col: newDataobj.col,
-                            row: newDataobj.row,
-                            zIndex: 0
-                        };
-                        lastNumber = 0;
-                        score += thisData.number;
-                    }
-                }
-            }
-
-            if(newIndex != currentTotalNumber) {
-                emptyIndex.push(startArray[sIndex][currentTotalNumber - 1]);
-            }
-
-            for(var i = newIndex; i<currentTotalNumber; i++) {
-                newData[startArray[sIndex][i]].newNumber = 0;
-            }
-        }
-
-        if(score) {
-            this.triggerEvent("score", score);
-            this.triggerEvent("score_1024", score);
-        }
-
-        if(emptyIndex.length) {
-            oldData[emptyIndex[(Math.random() * emptyIndex.length) | 0]].newNumber = 2;
-        }
-
-        var _this = this;
-        setTimeout(function() {
-            oldData.forEach(function(data) {
-                data.number = data.newNumber;
-                data.newPosition = null;
-            });
-
-            _this.setState({
-                playData: oldData,
-            });
-        }, this.animationTime * 1000);
-
-        this.setState({
-            playData: oldData,
-            animation: true
+    for (let row = 0; row < rowNumber; row++) {
+      for (let col = 0; col < colNumber; col++) {
+        playData.push({
+          row,
+          col,
+          number: 2
         });
-    },
-
-    _logData: function(data) {
-        var numberData = data.map(function(item) {
-            return item.number;
-        });
-
-        var rowNumber = this.props.table.row;
-        var colNumber = this.props.table.col;
-
-        for(var i = 0; i<rowNumber * colNumber; i+= colNumber ) {
-            console.log(numberData.slice(i, i + colNumber));
-        }
-
-    },
-
-    _getBlocks: function () {
-        var blockSize = this.props.block.size;
-        var rowNumber = this.props.table.row;
-        var animationTime = this.animationTime;
-
-        return this.state.playData.map(function(data) {
-            return (
-                 !!data.number ?
-                    (<Block data={data}
-                       size={blockSize}
-                       animationTime={animationTime}
-                       key={data.row * rowNumber + data.col} />) :
-                    "");
-        });
-    },
-
-    _getStyle: function() {
-        return {
-            width: this.props.block.size.width * this.props.table.col,
-            height: this.props.block.size.height * this.props.table.row
-        };
-    },
-
-    render: function () {
-        return (
-            <div className="game_1024" style={this._getStyle()} onKeyPress={this._handleKeyDown}>
-                {this._getBlocks()}
-            </div>);
+      }
     }
+
+    playData[0].number = 4;
+    playData[3].number = 2;
+    playData[7].number = 2;
+
+    this.numberMap = {
+      left: [0, colNumber, rowNumber, 1, colNumber],
+      up: [0, 1, colNumber, colNumber, rowNumber],
+      right: [colNumber - 1, colNumber, rowNumber, -1, colNumber],
+      bottom: [colNumber * rowNumber - 1, -1, colNumber, -colNumber, rowNumber]
+    };
+
+    return {
+      playData,
+      animation: false
+    };
+  },
+
+  componentDidMount() {
+    window.addEventListener('keydown', this.handleKeyDown);
+  },
+
+  handleKeyDown(event) {
+    const key = this.keyArrowMap[event.keyCode];
+    if (key) {
+      this._moveUp(key);
+    }
+  },
+
+  _moveUp(key) {
+    const rowNumber = this.props.table.row;
+    const colNumber = this.props.table.col;
+
+    const paraArray = this.numberMap[key];
+
+    const startIndex = paraArray[0];
+    const changeIndex = paraArray[1];
+    const totalNumber = paraArray[2];
+    const currentChangeNumber = paraArray[3];
+    const currentTotalNumber = paraArray[4];
+
+    const startArray = [];
+    const startCount = 0;
+    for (const index = startIndex; startCount < totalNumber; index += changeIndex) {
+      const thisArray = [];
+      const thisCount = 0;
+      for (const thisIndex = index; thisCount < currentTotalNumber; thisIndex += currentChangeNumber) {
+        thisArray.push(thisIndex);
+        thisCount++;
+      }
+
+      startArray.push(thisArray);
+
+      startCount++;
+    }
+
+    let oldData = this.state.playData;
+    const newData = oldData.slice();
+
+    const emptyIndex = [];
+
+    let score = 0;
+
+    for (let sIndex = 0; sIndex < totalNumber; sIndex++) {
+      let lastNumber = 0;
+      let newIndex = 0;
+
+      for (let tIndex = 0; tIndex < currentTotalNumber; tIndex++) {
+        const rightIndex = startArray[sIndex][tIndex];
+
+        const thisData = oldData[rightIndex];
+        if (thisData.number) {
+          let newDataobj;
+          if (lastNumber !== thisData.number) {
+            newDataobj = newData[startArray[sIndex][newIndex]];
+            newDataobj.newNumber = thisData.number;
+            oldData[rightIndex].newPosition = {
+              col: newDataobj.col,
+              row: newDataobj.row,
+              zIndex: 1,
+            };
+            lastNumber = thisData.number;
+            newIndex++;
+          } else {
+            newDataobj = newData[startArray[sIndex][newIndex - 1]];
+            newDataobj.newNumber = thisData.number * 2;
+            oldData[rightIndex].newPosition = {
+              col: newDataobj.col,
+              row: newDataobj.row,
+              zIndex: 0
+            };
+            lastNumber = 0;
+            score += thisData.number;
+          }
+        }
+      }
+
+      if (newIndex !== currentTotalNumber) {
+        emptyIndex.push(startArray[sIndex][currentTotalNumber - 1]);
+      }
+
+      for (let i = newIndex; i < currentTotalNumber; i++) {
+        newData[startArray[sIndex][i]].newNumber = 0;
+      }
+    }
+
+    if (score) {
+      this.triggerEvent('score', score);
+      this.triggerEvent('score_1024', score);
+    }
+
+    if (emptyIndex.length) {
+      oldData[emptyIndex[(Math.random() * emptyIndex.length) | 0]].newNumber = 2;
+    }
+
+    setTimeout(() => {
+      oldData = oldData.map((data) => {
+        const newOldData = data;
+        newOldData.number = data.newNumber;
+        newOldData.newPosition = null;
+
+        return newOldData;
+      });
+
+      this.setState({
+        playData: oldData,
+      });
+    }, this.animationTime * 1000);
+
+    this.setState({
+      playData: oldData,
+      animation: true
+    });
+  },
+
+  _logData(data) {
+    const numberData = data.map(item => item.number);
+
+    const rowNumber = this.props.table.row;
+    const colNumber = this.props.table.col;
+
+    for (let i = 0; i < rowNumber * colNumber; i += colNumber) {
+      console.log(numberData.slice(i, i + colNumber));
+    }
+  },
+
+  getBlocks() {
+    const blockSize = this.props.block.size;
+    const rowNumber = this.props.table.row;
+    const animationTime = this.animationTime;
+
+    return this.state.playData.map(
+      data => (!!data.number
+                ? (<Block
+                  data={data}
+                  size={blockSize}
+                  animationTime={animationTime}
+                  key={data.row * rowNumber + data.col}
+                />)
+                : '')
+    );
+  },
+
+  getStyle() {
+    return {
+      width: this.props.block.size.width * this.props.table.col,
+      height: this.props.block.size.height * this.props.table.row
+    };
+  },
+
+  render() {
+    return (
+      <div className="game_1024" style={this.getStyle()} onKeyPress={this.handleKeyDown}>
+        {this.getBlocks()}
+      </div>);
+  }
 });
 
 module.exports = Game1024;

@@ -1,22 +1,22 @@
-var React = require('react');
-var ReactDOM = require('react-dom');
+const React = require('react');
+const ReactDOM = require('react-dom');
 
-var Main = require('./React/Main.jsx');
+const Main = require('./React/Main.jsx');
 
-var data = {
-    table: {
-        col: 4,
-        row: 4
-    },
+const data = {
+  table: {
+    col: 4,
+    row: 4
+  },
 
-    block: {
-        size: {
-            width: 50,
-            height: 50
-        }
+  block: {
+    size: {
+      width: 50,
+      height: 50
     }
+  }
 };
 
 ReactDOM.render(
-    (<Main data={data} />),
-    document.getElementById('content'));
+  (<Main data={data} />),
+  document.getElementById('content'));
